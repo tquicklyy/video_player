@@ -22,7 +22,7 @@ public class MainMenuController {
 
     @FXML
     void initialize() {
-        mainMenuBorderPane.heightProperty().addListener((observable, oldValue, newValue) -> {
+        mainMenuBorderPane.heightProperty().addListener(( _, _, newValue) -> {
             if (newValue.intValue() < 530) {
                 mainMenuFirstLabel.setPrefHeight(54);
                 mainMenuFirstLabel.setPrefWidth(300);

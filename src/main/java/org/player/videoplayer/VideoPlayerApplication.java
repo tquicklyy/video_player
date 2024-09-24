@@ -31,7 +31,7 @@ public class VideoPlayerApplication extends Application {
         mainMenuStage.setMinHeight(MIN_HEIGHT_STAGE);
         mainMenuStage.setMinWidth(MIN_WIDTH_STAGE);
 
-        ChangeListener<Number> mainMenuStagePositionChangeListener = (observable, oldValue, newValue) -> {
+        ChangeListener<Number> mainMenuStagePositionChangeListener = (_, _, _) -> {
             if (!isMainMenuStageDragging) {
                 isMainMenuStageDragging = true;
                 mainMenuStage.setMinWidth(0);
