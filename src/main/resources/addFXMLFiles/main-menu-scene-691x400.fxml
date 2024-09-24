@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="mainMenuBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="691.0" stylesheets="@../cssStyle/mainMenuBorderPane.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.player.videoplayer.MainMenuController">
+   <center>
+      <VBox alignment="CENTER" prefHeight="400.0" prefWidth="643.0" spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="mainMenuFirstLabel" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="54.0" prefWidth="300.0" text="Video Player">
+               <font>
+                  <Font name="Arial Bold" size="44.0" />
+               </font>
+            </Label>
+            <Label fx:id="mainMenuSecondLabel" alignment="CENTER" prefHeight="32.0" prefWidth="300.0" style="-fx-background-color: white; -fx-background-radius: 7px; -fx-border-radius: 7px; -fx-border-color: black;" text="Посмотреть уроки по программированию">
+               <font>
+                  <Font name="Arial Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label fx:id="mainMenuThirdLabel" alignment="CENTER" prefHeight="32.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: black; -fx-background-radius: 7px; -fx-border-radius: 7px;" text="Посмотреть свои видеофайлы">
+               <font>
+                  <Font name="Arial Bold" size="13.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
