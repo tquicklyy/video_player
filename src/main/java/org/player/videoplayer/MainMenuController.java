@@ -1,10 +1,18 @@
 package org.player.videoplayer;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MainMenuController {
 
@@ -19,6 +27,18 @@ public class MainMenuController {
 
     @FXML
     private Label mainMenuThirdLabel;
+
+    private Scene newScene;
+
+    private Stage currentStage;
+
+    @FXML
+    private void switchingToTheVideoSelectionMenu(MouseEvent event) throws IOException {
+        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu.fxml"));
+        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        currentStage.setScene(newScene);
+    }
 
     @FXML
     void initialize() {

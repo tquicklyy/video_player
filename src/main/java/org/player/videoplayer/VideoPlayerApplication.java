@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +25,7 @@ public class VideoPlayerApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("main-menu-scene.fxml"));
         Scene mainMenuScene = new Scene(fxmlLoader.load());
 
-        mainMenuStage.setTitle("Video player");
+        mainMenuStage.setTitle("KubSTU Education");
         mainMenuStage.getIcons().add(new Image("file:./src/main/resources/images/logo-video-player.png"));
         mainMenuStage.setScene(mainMenuScene);
 

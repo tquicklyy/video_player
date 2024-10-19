@@ -1,15 +1,20 @@
 .combo-box .arrow {
-    -fx-background-color: black; /* Цвет самой стрелки (треугольника) */
-
+    -fx-background-color: black;
 }
 
+.combo-box .list-cell {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-color: #ff4c4c;
+}
 
 .combo-box .arrow-button {
     -fx-background-color: white;
     -fx-background-radius: 11px;
     -fx-border-color: #FF4040;
     -fx-border-width: 2px;
-    -fx-border-radius: 2px
+    -fx-border-radius: 2px;
+    -fx-fill: white;
 }
 
 
