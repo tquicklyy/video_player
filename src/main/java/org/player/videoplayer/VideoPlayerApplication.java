@@ -26,7 +26,7 @@ public class VideoPlayerApplication extends Application {
         Scene mainMenuScene = new Scene(fxmlLoader.load());
 
         mainMenuStage.setTitle("KubSTU Education");
-        mainMenuStage.getIcons().add(new Image("file:./src/main/resources/images/logo-video-player.png"));
+        mainMenuStage.getIcons().add(new Image("file:./src/main/resources/images/logo-video-player-white-background.png"));
         mainMenuStage.setScene(mainMenuScene);
 
         mainMenuStage.setMinHeight(MIN_HEIGHT_STAGE);
