@@ -1,27 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXSlider?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-   <center>
-      <MediaView fitHeight="200.0" fitWidth="200.0" BorderPane.alignment="CENTER" />
-   </center>
-   <top>
-      <VBox prefHeight="61.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+<BorderPane fx:id="videoPlayerSceneBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.player.videoplayer.VideoPlayerController">
+   <bottom>
+      <VBox fx:id="videoPlayerSceneBotVBox" alignment="BOTTOM_CENTER" prefHeight="63.0" prefWidth="600.0" spacing="7.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="600.0" style="-fx-background-color: #FF4040;">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="20.0" prefWidth="96.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Назад" textAlignment="JUSTIFY" textFill="WHITE">
+                  <Label fx:id="videoPlayerSceneCurrentTimeLabel" alignment="CENTER" prefHeight="16.0" prefWidth="45.0" text="00:00">
+                     <font>
+                        <Font name="Arial" size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER" maxHeight="-Infinity" prefHeight="0.0" prefWidth="510.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <JFXSlider fx:id="videoPlayerSceneTimeSlider" maxHeight="-Infinity" minHeight="-Infinity" onMouseDragged="#changeTimeWithSlider" onMousePressed="#changeTimeWithSlider" onMouseReleased="#continuePLayVideo" prefHeight="30.0" prefWidth="510.0" stylesheets="@../../../cssStyle/time-slider.css" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </JFXSlider>
+                     </children>
+                     <padding>
+                        <Insets left="7.0" right="7.0" />
+                     </padding>
+                  </HBox>
+                  <Label fx:id="videoPlayerSceneFullTimeLabel" alignment="CENTER" prefHeight="20.0" prefWidth="45.0" text="00:00" textAlignment="CENTER">
+                     <font>
+                        <Font name="Arial" size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="0.0" prefWidth="600.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <ImageView fx:id="videoPlayerSceneVolumeImageView" fitHeight="37.0" fitWidth="37.0" onMousePressed="#volumeOffOn" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/without-volume-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <JFXSlider fx:id="videoPlayerSceneVolumeSlider" onMouseDragged="#changeVolumeWithSlider" onMousePressed="#changeVolumeWithSlider" prefHeight="14.0" prefWidth="92.0" stylesheets="@../../../cssStyle/volume-slider.css">
+                           <padding>
+                              <Insets left="7.0" right="7.0" />
+                           </padding>
+                        </JFXSlider>
+                        <Label fx:id="videoPlayerSceneVolumeLabel" text="0">
+                           <font>
+                              <Font name="Arial" size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <ImageView fx:id="videoPlayerScenePreviousVideoImageView" fitHeight="37.0" fitWidth="37.0" onMousePressed="#openPreviousVideo" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/previous-video-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <ImageView fx:id="videoPlayerSceneTenSecondsBackImageView" fitHeight="37.0" fitWidth="37.0" onMousePressed="#tenSecondsBack" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/ten-seconds-back-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <ImageView fx:id="videoPlayerSceneStopPlayImageView" fitHeight="37.0" fitWidth="37.0" onMouseClicked="#playStopVideo" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/play-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <ImageView fx:id="videoPlayerSceneTenSecondsForwardImageView" fitHeight="37.0" fitWidth="37.0" onMousePressed="#tenSecondsForward" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/ten-seconds-forward-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <ImageView fx:id="videoPlayerSceneNextVideoImageView" fitHeight="37.0" fitWidth="48.0" onMousePressed="#openNextVideo" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/next-video-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <ImageView fx:id="videoPlayerSceneWrapUnwrapImageView" fitHeight="37.0" fitWidth="37.0" onMousePressed="#wrapUnwrapVideo" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../images/unwrap-button.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                     </children>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+         </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+      </VBox>
+   </bottom>
+   <top>
+      <HBox fx:id="videoPlayerSceneTopHBox" prefHeight="37.0" prefWidth="600.0" style="-fx-background-color: #FF4040;" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="37.0" prefWidth="300.0" style="-fx-background-color: #FF4040;" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="videoPlayerSceneBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Назад" textAlignment="JUSTIFY" textFill="WHITE">
                      <font>
                         <Font name="Arial Black" size="14.0" />
                      </font>
@@ -34,136 +168,38 @@
                   </Label>
                </children>
             </HBox>
-         </children>
-      </VBox>
-   </top>
-   <bottom>
-      <VBox alignment="BOTTOM_CENTER" prefHeight="23.0" prefWidth="600.0" spacing="7.0" BorderPane.alignment="CENTER">
-         <children>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+            <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity" prefHeight="38.0" prefWidth="296.0" spacing="10.0" style="-fx-background-color: #FF4040;" HBox.hgrow="ALWAYS">
                <children>
-                  <Label text="00:00">
+                  <Label fx:id="videoPlayerSceneAnotherVideoButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#openNewVideo" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Другое видео" textAlignment="JUSTIFY" textFill="WHITE">
                      <font>
-                        <Font name="Arial" size="14.0" />
+                        <Font name="Arial Black" size="14.0" />
                      </font>
-                     <HBox.margin>
-                        <Insets left="7.0" />
-                     </HBox.margin>
-                  </Label>
-                  <Slider prefHeight="14.0" prefWidth="502.0" stylesheets="@../../../cssStyle/slider.css" HBox.hgrow="ALWAYS">
                      <cursor>
                         <Cursor fx:constant="HAND" />
-                     </cursor></Slider>
-                  <Label text="02:39">
-                     <font>
-                        <Font name="Arial" size="14.0" />
-                     </font>
+                     </cursor>
                      <HBox.margin>
-                        <Insets right="7.0" />
+                        <Insets right="10.0" />
                      </HBox.margin>
                   </Label>
                </children>
             </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-               </children></HBox>
-            <HBox alignment="CENTER" prefHeight="0.0" prefWidth="600.0">
-               <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/volume-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <Slider prefHeight="14.0" prefWidth="77.0" stylesheets="@../../../cssStyle/slider.css">
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor></Slider>
-                        <Label text="10">
-                           <font>
-                              <Font name="Arial" size="14.0" />
-                           </font></Label>
-                     </children>
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                  </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/ten-seconds-back-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/previous-video-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/stop-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/next-video-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/ten-seconds-forward-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <ImageView fitHeight="37.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../images/unwrap-button.png" />
-                           </image>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </ImageView>
-                     </children>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding></HBox>
-               </children>
-            </HBox>
          </children>
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
-         <padding>
-            <Insets bottom="10.0" />
-         </padding>
-      </VBox>
-   </bottom>
+      </HBox>
+   </top>
+   <center>
+      <AnchorPane fx:id="videoPlayerSceneAnchorPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <StackPane fx:id="videoPlayerSceneStackPane" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <MediaView fx:id="videoPlayerSceneMediaView" fitHeight="200.0" fitWidth="200.0" />
+                  <ImageView fx:id="videoPlayerSceneCentralImageView" fitHeight="263.0" fitWidth="335.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                     <image>
+                        <Image url="@../../../images/error-loading.gif" />
+                     </image>
+                  </ImageView>
+               </children>
+            </StackPane>
+         </children>
+      </AnchorPane>
+   </center>
 </BorderPane>

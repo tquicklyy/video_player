@@ -1,0 +1,18 @@
+.jfx-slider > .track {
+     -fx-background-color: lightgray;
+     -fx-pref-height: 5px;
+}
+
+.jfx-slider > .thumb {
+     -fx-background-color: #FF9A26;
+}
+
+.jfx-slider > .colored-track {
+     -fx-background-color: #FF9A26;
+}
+
+.jfx-slider > .animated-thumb {
+     -fx-opacity: 0;
+}
+
+

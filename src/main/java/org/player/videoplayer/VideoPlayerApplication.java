@@ -22,7 +22,7 @@ public class VideoPlayerApplication extends Application {
 
     @Override
     public void start(Stage mainMenuStage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("main-menu-scene.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
         Scene mainMenuScene = new Scene(fxmlLoader.load());
 
         mainMenuStage.setTitle("KubSTU Education");
@@ -31,6 +31,10 @@ public class VideoPlayerApplication extends Application {
 
         mainMenuStage.setMinHeight(MIN_HEIGHT_STAGE);
         mainMenuStage.setMinWidth(MIN_WIDTH_STAGE);
+
+        mainMenuStage.setOnCloseRequest(event -> {
+            System.exit(0); // Гарантированное завершение приложения
+        });
 
         ChangeListener<Number> mainMenuStagePositionChangeListener = (_, _, _) -> {
             if (!isMainMenuStageDragging) {
