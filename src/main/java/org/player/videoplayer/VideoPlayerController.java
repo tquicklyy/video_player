@@ -15,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -113,6 +112,7 @@ public class VideoPlayerController {
     private static boolean isFullScreen = false;
     private static boolean isFullScreenListenerAdded = false;
     private static boolean isPauseForDisposeNow = false;
+    private static boolean isSeekingTime = false;
 
 
     private double lastVolumeValueWhenUserOffVolume;
@@ -166,12 +166,14 @@ public class VideoPlayerController {
                 isVideoPlayed = false;
             } else {
                 if (isVideoEnded) {
+                    isSeekingTime = true;
                     mediaPlayerOfVideo.seek(Duration.seconds(0));
                     isVideoEnded = false;
                 }
                 mediaPlayerOfVideo.play();
                 videoPlayerSceneStopPlayImageView.setImage(new Image(getClass().getResource("/images/stop-button.png").toString()));
                 isVideoPlayed = true;
+                isSeekingTime = false;
             }
         }
     }
@@ -180,7 +182,9 @@ public class VideoPlayerController {
     private void changeTimeWithSlider() {
         if(mediaPlayerOfVideo != null && !isPauseForDisposeNow) {
             mediaPlayerOfVideo.pause();
+            isSeekingTime = true;
             mediaPlayerOfVideo.seek(Duration.seconds((int)videoPlayerSceneTimeSlider.getValue()));
+            isSeekingTime = false;
         }
     }
 
@@ -215,14 +219,18 @@ public class VideoPlayerController {
     @FXML
     private void tenSecondsBack() {
         if(mediaPlayerOfVideo != null && !isPauseForDisposeNow) {
+            isSeekingTime = true;
             mediaPlayerOfVideo.seek(Duration.seconds((int)mediaPlayerOfVideo.getCurrentTime().toSeconds() - 10));
+            isSeekingTime = false;
         }
     }
 
     @FXML
     private void tenSecondsForward() {
         if(mediaPlayerOfVideo != null && !isPauseForDisposeNow) {
+            isSeekingTime = true;
             mediaPlayerOfVideo.seek(Duration.seconds((int)mediaPlayerOfVideo.getCurrentTime().toSeconds() + 10));
+            isSeekingTime = false;
         }
     }
 
@@ -320,6 +328,13 @@ public class VideoPlayerController {
             mediaPlayerOfVideo.dispose();
             mediaOfVideo = null;
         }
+
+        if(attemptsDownloadVideoIfError == MAX_ATTEMPTS_DOWNLOAD_VIDEO_IF_ERROR) {
+            new Alert(Alert.AlertType.ERROR, "Не удалось загрузить видео после нескольких попыток. Пожалуйста попробуйте загрузить видео заново, " +
+                    "если данный тип видео поддерживается программой").showAndWait();
+            return;
+        }
+
         pauseForDispose = new PauseTransition(Duration.millis(1500));
         pauseForDispose.setOnFinished(_ -> {
             setupVideo();
@@ -330,11 +345,6 @@ public class VideoPlayerController {
     }
 
     private void setupVideo() {
-        if(attemptsDownloadVideoIfError == MAX_ATTEMPTS_DOWNLOAD_VIDEO_IF_ERROR) {
-            new Alert(Alert.AlertType.ERROR).showAndWait();
-            return;
-        }
-
         mediaOfVideo = new Media(urlOfVideo);
         mediaPlayerOfVideo = new MediaPlayer(mediaOfVideo);
 
@@ -357,18 +367,21 @@ public class VideoPlayerController {
             mediaPlayerOfVideo.currentTimeProperty().addListener((_, _, newValue) -> {
                 System.out.println(newValue.toSeconds());
                 System.out.println(videoPlayerSceneTimeSlider.getValue());
-                if(isVideoEnded) {
-                    isVideoEnded = false;
-                    isVideoPlayed = true;
-                    videoPlayerSceneStopPlayImageView.setImage(new Image(getClass().getResource("/images/stop-button.png").toString()));
+                if(!isSeekingTime) {
+                    if (isVideoEnded) {
+                        isVideoEnded = false;
+                        isVideoPlayed = true;
+                        videoPlayerSceneStopPlayImageView.setImage(new Image(getClass().getResource("/images/stop-button.png").toString()));
+                    }
+                    videoPlayerSceneTimeSlider.setValue(newValue.toSeconds());
+                    videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d", (int) newValue.toMinutes(), (int) newValue.toSeconds() % 60));
                 }
-                if(Math.abs(newValue.toMillis() - totalDurationOfVideo.toMillis()) < 150) {
-                    videoPlayerSceneStopPlayImageView.setImage(new Image(getClass().getResource("/images/play-button.png").toString()));
-                    isVideoEnded = true;
-                    isVideoPlayed = false;
-                }
-                videoPlayerSceneTimeSlider.setValue(newValue.toSeconds());
-                videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d", (int)newValue.toMinutes(), (int)newValue.toSeconds() % 60));
+            });
+
+            mediaPlayerOfVideo.setOnEndOfMedia(() -> {
+                videoPlayerSceneStopPlayImageView.setImage(new Image(getClass().getResource("/images/play-button.png").toString()));
+                isVideoEnded = true;
+                isVideoPlayed = false;
             });
 
             isVolumeOff = false;
