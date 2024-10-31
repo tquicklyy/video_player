@@ -176,7 +176,7 @@ public class VideoPlayerController {
             timerForFullScreenWhenUserMovedMouse.cancel();
             mediaPlayerOfVideo.pause();
             isSeekingTime = true;
-            mediaPlayerOfVideo.seek(Duration.seconds((int)videoPlayerSceneTimeSlider.getValue()));
+            mediaPlayerOfVideo.seek(Duration.seconds(videoPlayerSceneTimeSlider.getValue()));
             isSeekingTime = false;
         }
     }
@@ -184,8 +184,14 @@ public class VideoPlayerController {
     @FXML
     private void continuePLayVideo() {
         if(isVideoPlayed && mediaOfVideo != null && !isPauseForDisposeNow) {
-            mediaPlayerOfVideo.play();
-            resetTimerForMainMenuStageDragging();
+            pauseForDispose = new PauseTransition(Duration.millis(500));
+            pauseForDispose.setOnFinished(_ -> {
+                mediaPlayerOfVideo.play();
+                resetTimerForMainMenuStageDragging();
+                isPauseForDisposeNow = false;
+            });
+            isPauseForDisposeNow = true;
+            pauseForDispose.play();
         }
     }
 

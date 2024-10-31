@@ -22,7 +22,7 @@ public class VideoPlayerApplication extends Application {
 
     @Override
     public void start(Stage mainMenuStage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-download-scene.fxml"));
         Scene mainMenuScene = new Scene(fxmlLoader.load());
 
         mainMenuStage.setTitle("KubSTU Education");
