@@ -1,5 +1,6 @@
 package org.player.videoplayer;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -31,12 +32,33 @@ public class MainMenuController {
 
     private Stage currentStage;
 
+    private VideoPlayerController videoPlayerControllerWhenSwitch;
+
     @FXML
     private void switchingToTheVideoSelectionMenu(MouseEvent event) throws IOException {
         currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
         currentStage.setScene(newScene);
+    }
+
+    @FXML
+    private void switchingToTheVideoPlayerScene(MouseEvent event) throws IOException {
+        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
+        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        videoPlayerControllerWhenSwitch = fxmlLoader.getController();
+        videoPlayerControllerWhenSwitch.setPreviousScene("main-menu-scene.fxml");
+        currentStage.setScene(newScene);
+
+        Platform.runLater(() -> {
+            videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
+            videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
+            videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
+            videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+            videoPlayerControllerWhenSwitch.updateSizes(newScene.getHeight());
+            videoPlayerControllerWhenSwitch.openNewVideo();
+        });
     }
 
     @FXML

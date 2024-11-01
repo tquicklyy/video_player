@@ -1,6 +1,7 @@
 package org.player.videoplayer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -9,6 +10,7 @@ import com.jfoenix.controls.JFXSlider;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -16,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -62,6 +65,10 @@ public class VideoPlayerController {
     @FXML
     private ImageView videoPlayerSceneTenSecondsForwardImageView;
 
+    public JFXSlider getVideoPlayerSceneTimeSlider() {
+        return videoPlayerSceneTimeSlider;
+    }
+
     @FXML
     private JFXSlider videoPlayerSceneTimeSlider;
 
@@ -70,6 +77,10 @@ public class VideoPlayerController {
 
     @FXML
     private Label videoPlayerSceneVolumeLabel;
+
+    public Slider getVideoPlayerSceneVolumeSlider() {
+        return videoPlayerSceneVolumeSlider;
+    }
 
     @FXML
     private Slider videoPlayerSceneVolumeSlider;
@@ -86,6 +97,12 @@ public class VideoPlayerController {
     @FXML
     private VBox videoPlayerSceneBotVBox;
 
+    public void setPreviousScene(String previousScene) {
+        this.previousScene = previousScene;
+    }
+
+    private String previousScene;
+
     private static Stage currentStage;
     private static Scene currentScene;
     private static Scene newScene;
@@ -101,15 +118,15 @@ public class VideoPlayerController {
 
     Duration totalDurationOfVideo;
 
-    private static boolean isVideoPlayed = true;
-    private static boolean isVideoEnded = false;
-    private static boolean isVolumeOff = true;
-    private static boolean isFullScreen = false;
-    private static boolean isFullScreenListenerAdded = false;
-    private static boolean isPauseForDisposeNow = false;
-    private static boolean isSeekingTime = false;
-    private static boolean isVideoHasHours;
-    private static boolean isTrackAndThumbInit = false;
+    private boolean isVideoPlayed = true;
+    private boolean isVideoEnded = false;
+    private boolean isVolumeOff = true;
+    private boolean isFullScreen = false;
+    private boolean isFullScreenListenerAdded = false;
+    private boolean isPauseForDisposeNow = false;
+    private boolean isSeekingTime = false;
+    private boolean isVideoHasHours;
+    private boolean isTrackAndThumbInit = false;
 
     private double lastVolumeValueWhenUserOffVolume;
 
@@ -135,6 +152,22 @@ public class VideoPlayerController {
     private static Font videoPlayerSceneFullTimeLabelFontBeforeWrap;
     private static Font videoPlayerSceneVolumeLabelFontBeforeWrap;
 
+    public void setTrackInTimeSlider(Node trackInTimeSlider) {
+        VideoPlayerController.trackInTimeSlider = trackInTimeSlider;
+    }
+
+    public void setTrackInVolumeSlider(Node trackInVolumeSlider) {
+        VideoPlayerController.trackInVolumeSlider = trackInVolumeSlider;
+    }
+
+    public void setThumbInTimeSlider(Node thumbInTimeSlider) {
+        VideoPlayerController.thumbInTimeSlider = thumbInTimeSlider;
+    }
+
+    public void setThumbInVolumeSlider(Node thumbInVolumeSlider) {
+        VideoPlayerController.thumbInVolumeSlider = thumbInVolumeSlider;
+    }
+
     private static Node trackInTimeSlider;
     private static Node trackInVolumeSlider;
     private static Node thumbInTimeSlider;
@@ -146,6 +179,22 @@ public class VideoPlayerController {
     private PauseTransition pauseForDispose;
 
     private static Alert alertWithVideo;
+
+    @FXML
+    private void switchingToTheBackScene(MouseEvent event) throws IOException {
+        if(mediaPlayerOfVideo != null) {
+            mediaPlayerOfVideo.dispose();
+            mediaOfVideo = null;
+        }
+
+        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
+        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+
+        Platform.runLater(() -> {
+            currentStage.setScene(newScene);
+        });
+    }
 
     @FXML
     private void playStopVideo() {
@@ -300,7 +349,7 @@ public class VideoPlayerController {
     }
 
     @FXML
-    private void openNewVideo() {
+    public void openNewVideo() {
         if(!isFullScreenListenerAdded) {
             currentStage = (Stage) videoPlayerSceneBorderPane.getScene().getWindow();
             addListenerForStageFullScreenProperty();
@@ -573,7 +622,120 @@ public class VideoPlayerController {
         }, 3000);
     }
 
+    public void updateSizes(Number newValue) {
+        if(trackInTimeSlider == null || trackInVolumeSlider == null || thumbInTimeSlider == null || thumbInVolumeSlider == null) {
+            return;
+        }
+        if (newValue.intValue() < 600) {
+            topAnchorWhenFullScreen = 32;
 
+            videoPlayerSceneTopHBox.setPrefHeight(39);
+
+            videoPlayerSceneBackButton.setPrefWidth(132);
+            videoPlayerSceneBackButton.setPrefHeight(27);
+            videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 14));
+
+            if(isVideoHasHours) {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(62);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 14));
+            } else {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 14));
+            }
+
+            videoPlayerSceneVolumeImageView.setFitWidth(37);
+            videoPlayerSceneVolumeImageView.setFitHeight(37);
+
+            videoPlayerSceneVolumeSlider.setPrefWidth(92);
+
+            trackInTimeSlider.setStyle("-fx-pref-height: 5px;");
+            trackInVolumeSlider.setStyle("-fx-pref-height: 5px;");
+
+            thumbInTimeSlider.setStyle("-fx-pref-width: 14px; -fx-pref-height: 14px;");
+            thumbInVolumeSlider.setStyle("-fx-pref-width: 14px; -fx-pref-height: 14px;");
+        } else if (newValue.intValue() < 800) {
+            topAnchorWhenFullScreen = 33;
+
+            videoPlayerSceneTopHBox.setPrefHeight(40);
+
+            videoPlayerSceneBackButton.setPrefWidth(171);
+            videoPlayerSceneBackButton.setPrefHeight(28);
+            videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 15));
+
+            if(isVideoHasHours) {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(65);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 15));
+            } else {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 15));
+            }
+
+            videoPlayerSceneVolumeImageView.setFitWidth(40);
+            videoPlayerSceneVolumeImageView.setFitHeight(40);
+
+            videoPlayerSceneVolumeSlider.setPrefWidth(105);
+
+            trackInTimeSlider.setStyle("-fx-pref-height: 6px;");
+            trackInVolumeSlider.setStyle("-fx-pref-height: 6px;");
+
+            thumbInTimeSlider.setStyle("-fx-pref-width: 15px; -fx-pref-height: 15px;");
+            thumbInVolumeSlider.setStyle("-fx-pref-width: 15px; -fx-pref-height: 15px;");
+        } else if (newValue.intValue() < 1000) {
+            topAnchorWhenFullScreen = 34;
+
+            videoPlayerSceneTopHBox.setPrefHeight(41);
+
+            videoPlayerSceneBackButton.setPrefWidth(210);
+            videoPlayerSceneBackButton.setPrefHeight(29);
+            videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 16));
+
+            if(isVideoHasHours) {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(68);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 16));
+            } else {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 16));
+            }
+
+            videoPlayerSceneVolumeImageView.setFitWidth(43);
+            videoPlayerSceneVolumeImageView.setFitHeight(43);
+
+            videoPlayerSceneVolumeSlider.setPrefWidth(118);
+
+            trackInTimeSlider.setStyle("-fx-pref-height: 7px;");
+            trackInVolumeSlider.setStyle("-fx-pref-height: 7px;");
+
+            thumbInTimeSlider.setStyle("-fx-pref-width: 16px; -fx-pref-height: 16px;");
+            thumbInVolumeSlider.setStyle("-fx-pref-width: 16px; -fx-pref-height: 16px;");
+        } else {
+            topAnchorWhenFullScreen = 35;
+
+            videoPlayerSceneTopHBox.setPrefHeight(42);
+
+            videoPlayerSceneBackButton.setPrefWidth(250);
+            videoPlayerSceneBackButton.setPrefHeight(30);
+            videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 17));
+
+            if(isVideoHasHours) {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(71);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 17));
+            } else {
+                videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
+                videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 17));
+            }
+
+            videoPlayerSceneVolumeImageView.setFitWidth(46);
+            videoPlayerSceneVolumeImageView.setFitHeight(46);
+
+            videoPlayerSceneVolumeSlider.setPrefWidth(130);
+
+            trackInTimeSlider.setStyle("-fx-pref-height: 8px;");
+            trackInVolumeSlider.setStyle("-fx-pref-height: 8px;");
+
+            thumbInTimeSlider.setStyle("-fx-pref-width: 17px; -fx-pref-height: 17px;");
+            thumbInVolumeSlider.setStyle("-fx-pref-width: 17px; -fx-pref-height: 17px;");
+        }
+    }
 
     @FXML
     void initialize() {
@@ -623,123 +785,7 @@ public class VideoPlayerController {
         });
 
         videoPlayerSceneBorderPane.heightProperty().addListener(( _, _, newValue) -> {
-            if(!isTrackAndThumbInit) {
-                trackInTimeSlider = videoPlayerSceneTimeSlider.lookup(".track");
-                trackInVolumeSlider = videoPlayerSceneVolumeSlider.lookup(".track");
-                thumbInTimeSlider = videoPlayerSceneTimeSlider.lookup(".thumb");
-                thumbInVolumeSlider = videoPlayerSceneVolumeSlider.lookup(".thumb");
-                isTrackAndThumbInit = true;
-            }
-            if (newValue.intValue() < 600) {
-                topAnchorWhenFullScreen = 32;
-
-                videoPlayerSceneTopHBox.setPrefHeight(39);
-
-                videoPlayerSceneBackButton.setPrefWidth(132);
-                videoPlayerSceneBackButton.setPrefHeight(27);
-                videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 14));
-
-                if(isVideoHasHours) {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(62);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 14));
-                } else {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 14));
-                }
-
-                videoPlayerSceneVolumeImageView.setFitWidth(37);
-                videoPlayerSceneVolumeImageView.setFitHeight(37);
-
-                videoPlayerSceneVolumeSlider.setPrefWidth(92);
-
-                trackInTimeSlider.setStyle("-fx-pref-height: 5px;");
-                trackInVolumeSlider.setStyle("-fx-pref-height: 5px;");
-
-                thumbInTimeSlider.setStyle("-fx-pref-width: 14px; -fx-pref-height: 14px;");
-                thumbInVolumeSlider.setStyle("-fx-pref-width: 14px; -fx-pref-height: 14px;");
-            } else if (newValue.intValue() < 800) {
-                topAnchorWhenFullScreen = 33;
-
-                videoPlayerSceneTopHBox.setPrefHeight(40);
-
-                videoPlayerSceneBackButton.setPrefWidth(171);
-                videoPlayerSceneBackButton.setPrefHeight(28);
-                videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 15));
-
-                if(isVideoHasHours) {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(65);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 15));
-                } else {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 15));
-                }
-
-                videoPlayerSceneVolumeImageView.setFitWidth(40);
-                videoPlayerSceneVolumeImageView.setFitHeight(40);
-
-                videoPlayerSceneVolumeSlider.setPrefWidth(105);
-
-                trackInTimeSlider.setStyle("-fx-pref-height: 6px;");
-                trackInVolumeSlider.setStyle("-fx-pref-height: 6px;");
-
-                thumbInTimeSlider.setStyle("-fx-pref-width: 15px; -fx-pref-height: 15px;");
-                thumbInVolumeSlider.setStyle("-fx-pref-width: 15px; -fx-pref-height: 15px;");
-            } else if (newValue.intValue() < 1000) {
-                topAnchorWhenFullScreen = 34;
-
-                videoPlayerSceneTopHBox.setPrefHeight(41);
-
-                videoPlayerSceneBackButton.setPrefWidth(210);
-                videoPlayerSceneBackButton.setPrefHeight(29);
-                videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 16));
-
-                if(isVideoHasHours) {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(68);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 16));
-                } else {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 16));
-                }
-
-                videoPlayerSceneVolumeImageView.setFitWidth(43);
-                videoPlayerSceneVolumeImageView.setFitHeight(43);
-
-                videoPlayerSceneVolumeSlider.setPrefWidth(118);
-
-                trackInTimeSlider.setStyle("-fx-pref-height: 7px;");
-                trackInVolumeSlider.setStyle("-fx-pref-height: 7px;");
-
-                thumbInTimeSlider.setStyle("-fx-pref-width: 16px; -fx-pref-height: 16px;");
-                thumbInVolumeSlider.setStyle("-fx-pref-width: 16px; -fx-pref-height: 16px;");
-            } else {
-                topAnchorWhenFullScreen = 35;
-
-                videoPlayerSceneTopHBox.setPrefHeight(42);
-
-                videoPlayerSceneBackButton.setPrefWidth(250);
-                videoPlayerSceneBackButton.setPrefHeight(30);
-                videoPlayerSceneBackButton.setFont(Font.font("Arial Black", 17));
-
-                if(isVideoHasHours) {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(71);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 17));
-                } else {
-                    videoPlayerSceneCurrentTimeLabel.setPrefWidth(45);
-                    videoPlayerSceneCurrentTimeLabel.setFont(Font.font("Arial", 17));
-                }
-
-                videoPlayerSceneVolumeImageView.setFitWidth(46);
-                videoPlayerSceneVolumeImageView.setFitHeight(46);
-
-                videoPlayerSceneVolumeSlider.setPrefWidth(130);
-
-                trackInTimeSlider.setStyle("-fx-pref-height: 8px;");
-                trackInVolumeSlider.setStyle("-fx-pref-height: 8px;");
-
-                thumbInTimeSlider.setStyle("-fx-pref-width: 17px; -fx-pref-height: 17px;");
-                thumbInVolumeSlider.setStyle("-fx-pref-width: 17px; -fx-pref-height: 17px;");
-            }
+            updateSizes(newValue);
         });
-
     }
 }

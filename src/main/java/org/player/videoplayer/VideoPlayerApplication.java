@@ -32,8 +32,8 @@ public class VideoPlayerApplication extends Application {
         mainMenuStage.setMinHeight(MIN_HEIGHT_STAGE);
         mainMenuStage.setMinWidth(MIN_WIDTH_STAGE);
 
-        mainMenuStage.setOnCloseRequest(event -> {
-            System.exit(0); // Гарантированное завершение приложения
+        mainMenuStage.setOnCloseRequest(_ -> {
+            System.exit(0);
         });
 
         ChangeListener<Number> mainMenuStagePositionChangeListener = (_, _, _) -> {
