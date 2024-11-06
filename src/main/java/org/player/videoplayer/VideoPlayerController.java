@@ -1,11 +1,5 @@
 package org.player.videoplayer;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -27,6 +21,12 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class VideoPlayerController {
@@ -92,6 +92,9 @@ public class VideoPlayerController {
     private BorderPane videoPlayerSceneBorderPane;
 
     @FXML
+    private ImageView videoPlayerSceneSynchronizeImageView;
+
+    @FXML
     private HBox videoPlayerSceneTopHBox;
 
     @FXML
@@ -107,7 +110,7 @@ public class VideoPlayerController {
     private static Scene currentScene;
     private static Scene newScene;
 
-    private static String urlOfVideo;
+    public String urlOfVideo;
     private String urlOfDirectoryOfVideo;
 
     private static int attemptsDownloadVideoIfError = 0;
@@ -127,6 +130,7 @@ public class VideoPlayerController {
     private boolean isSeekingTime = false;
     private boolean isVideoHasHours;
     private boolean isTrackAndThumbInit = false;
+    private boolean isBackButton;
 
     private double lastVolumeValueWhenUserOffVolume;
 
@@ -148,7 +152,7 @@ public class VideoPlayerController {
 
     private static double videoPlayerSceneVolumeImageViewWidthBeforeWrap;
 
-    private static Font videoPlayerSceneCurrentTimeLabelFontBeforeWrap;
+    private Font videoPlayerSceneCurrentTimeLabelFontBeforeWrap;
     private static Font videoPlayerSceneFullTimeLabelFontBeforeWrap;
     private static Font videoPlayerSceneVolumeLabelFontBeforeWrap;
 
@@ -178,18 +182,36 @@ public class VideoPlayerController {
     private Timer timerForFullScreenWhenUserMovedMouse = new Timer();
     private PauseTransition pauseForDispose;
 
+    public boolean isEducationVideo;
+
+    private VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch;
+
     private static Alert alertWithVideo;
 
     @FXML
     private void switchingToTheBackScene(MouseEvent event) throws IOException {
+        isBackButton = true;
         if(mediaPlayerOfVideo != null) {
             mediaPlayerOfVideo.dispose();
             mediaOfVideo = null;
         }
-
+        currentScene = ((Node)event.getSource()).getScene();
         currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        if(previousScene.equals("video-selection-menu-scene.fxml")) {
+            VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+            VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuFlowPane());
+
+
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setDisable(false);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setDisable(false);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setOpacity(1);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setOpacity(1);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().getItems().addAll(VideoSelectionMenuController.leftComboBox);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().getItems().addAll(VideoSelectionMenuController.rightComboBox);
+            VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
+        }
 
         Platform.runLater(() -> {
             currentStage.setScene(newScene);
@@ -321,20 +343,40 @@ public class VideoPlayerController {
         }
     }
 
-    private static void doDictionaryOfPathToVideosInCurrentDirectory(String urlOfDirectoryOfVideo) {
+    public void doDictionaryOfPathToVideosInCurrentDirectory(String urlOfDirectoryOfVideo) {
         dictionaryOfPathToVideosInCurrentDirectory = new HashMap<>();
         File directory = new File(urlOfDirectoryOfVideo);
-        if(directory.exists() && directory.isDirectory()) {
-            int key = 0;
-            lastNumberOfDictionary = 0;
-            for (File file: directory.listFiles()) {
-                if(isFileVideo(file)) {
-                    if(file.toURI().toString().equals(urlOfVideo)) {
-                        currentKeyOfVideoForDictionary = key;
+        if(isEducationVideo) {
+            File generalDirectory = directory.getParentFile();
+            if(generalDirectory.exists() && generalDirectory.isDirectory()) {
+                int key = 0;
+                lastNumberOfDictionary = 0;
+                for (File file : generalDirectory.listFiles()) {
+                    for(File fileInside: file.listFiles()) {
+                        if (isFileVideo(fileInside)) {
+                            if (file.toURI().toString().equals(urlOfVideo)) {
+                                currentKeyOfVideoForDictionary = key;
+                            }
+                            dictionaryOfPathToVideosInCurrentDirectory.put(key, fileInside.toURI().toString());
+                            if (key > lastNumberOfDictionary) lastNumberOfDictionary = key;
+                            key++;
+                        }
                     }
-                    dictionaryOfPathToVideosInCurrentDirectory.put(key,file.toURI().toString());
-                    if (key > lastNumberOfDictionary) lastNumberOfDictionary = key;
-                    key++;
+                }
+            }
+        } else {
+            if (directory.exists() && directory.isDirectory()) {
+                int key = 0;
+                lastNumberOfDictionary = 0;
+                for (File file : directory.listFiles()) {
+                    if (isFileVideo(file)) {
+                        if (file.toURI().toString().equals(urlOfVideo)) {
+                            currentKeyOfVideoForDictionary = key;
+                        }
+                        dictionaryOfPathToVideosInCurrentDirectory.put(key, file.toURI().toString());
+                        if (key > lastNumberOfDictionary) lastNumberOfDictionary = key;
+                        key++;
+                    }
                 }
             }
         }
@@ -369,6 +411,9 @@ public class VideoPlayerController {
         File selectedFile = fileChooserOfVideo.showOpenDialog(currentStage);
 
         if(selectedFile != null) {
+            videoPlayerSceneAnotherVideoButton.setDisable(true);
+            videoPlayerSceneSynchronizeImageView.setVisible(true);
+
             urlOfVideo = selectedFile.toURI().toString();
             urlOfDirectoryOfVideo = selectedFile.getParent();
 
@@ -385,12 +430,11 @@ public class VideoPlayerController {
         }
     }
 
-    private void restartPlayer() {
+    public void restartPlayer() {
         if(mediaPlayerOfVideo != null) {
             mediaPlayerOfVideo.dispose();
             mediaOfVideo = null;
         }
-
         if(attemptsDownloadVideoIfError == MAX_ATTEMPTS_DOWNLOAD_VIDEO_IF_ERROR) {
             alertWithVideo = new Alert(Alert.AlertType.ERROR);
             alertWithVideo.setTitle("Ошибка открытия видео");
@@ -400,14 +444,16 @@ public class VideoPlayerController {
             alertWithVideo.showAndWait();
             return;
         }
-
-        pauseForDispose = new PauseTransition(Duration.millis(1000));
+        isPauseForDisposeNow = true;
+        pauseForDispose = new PauseTransition(Duration.millis(2000));
         pauseForDispose.setOnFinished(_ -> {
+            if(isBackButton) {
+                isBackButton = false;
+                return;
+            }
             setupVideo();
         });
-        isPauseForDisposeNow = true;
         pauseForDispose.play();
-
     }
 
     private void setupVideo() {
@@ -463,6 +509,16 @@ public class VideoPlayerController {
             isVideoPlayed = true;
             videoPlayerSceneMediaView.setMediaPlayer(mediaPlayerOfVideo);
             isPauseForDisposeNow = false;
+            videoPlayerSceneAnotherVideoButton.setDisable(false);
+            videoPlayerSceneSynchronizeImageView.setVisible(false);
+
+            if(isBackButton) {
+                if(mediaPlayerOfVideo != null) {
+                    mediaPlayerOfVideo.dispose();
+                    mediaOfVideo = null;
+                }
+                isBackButton = false;
+            }
         });
     }
 
@@ -741,6 +797,9 @@ public class VideoPlayerController {
     void initialize() {
         videoPlayerSceneVolumeSlider.setValue(0);
         videoPlayerSceneTimeSlider.setValue(0);
+
+        videoPlayerSceneSynchronizeImageView.fitHeightProperty().bind(videoPlayerSceneAnotherVideoButton.heightProperty());
+        videoPlayerSceneSynchronizeImageView.fitWidthProperty().bind(videoPlayerSceneAnotherVideoButton.widthProperty());
 
         videoPlayerSceneMediaView.fitWidthProperty().bind(videoPlayerSceneBorderPane.widthProperty());
         videoPlayerSceneMediaView.fitHeightProperty().bind(videoPlayerSceneBorderPane.heightProperty().subtract(videoPlayerSceneTopHBox.heightProperty()).subtract(videoPlayerSceneBotVBox.heightProperty()).subtract(10));

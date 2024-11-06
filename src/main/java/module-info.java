@@ -5,6 +5,7 @@ module org.player.videoplayer {
     requires java.desktop;
     requires javafx.media;
     requires com.jfoenix;
+    requires java.sql;
 
 
     opens org.player.videoplayer to javafx.fxml;

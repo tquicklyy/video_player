@@ -30,16 +30,20 @@ public class MainMenuController {
 
     private Scene newScene;
 
-    private Stage currentStage;
+    public static Stage currentStage;
 
     private VideoPlayerController videoPlayerControllerWhenSwitch;
+    private VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch;
 
     @FXML
     private void switchingToTheVideoSelectionMenu(MouseEvent event) throws IOException {
         currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+        VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
         currentStage.setScene(newScene);
+        videoSelectionMenuControllerWhenSwitch.startSynchronize();
     }
 
     @FXML

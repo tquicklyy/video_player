@@ -1,39 +1,37 @@
 package org.player.videoplayer;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import com.jfoenix.controls.JFXTextArea;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class VideoDownloadController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private Label videoDownloadSceneBackButton;
 
     @FXML
-    private Label videoDownloadSceneCentralLabel;
+    private Label videoDownloadSceneOfflineModeButton;
+
+    @FXML
+    public Label videoDownloadSceneCentralLabel;
 
     @FXML
     private HBox videoDownloadSceneDownloadHBox;
@@ -42,10 +40,10 @@ public class VideoDownloadController {
     private ImageView videoDownloadSceneDownloadImageView;
 
     @FXML
-    private Label videoDownloadSceneDownloadLabel;
+    public Label videoDownloadSceneDownloadLabel;
 
     @FXML
-    private ImageView videoDownloadSceneGifImageView;
+    public ImageView videoDownloadSceneGifImageView;
 
     @FXML
     private VBox videoDownloadSceneRedVBox;
@@ -65,6 +63,10 @@ public class VideoDownloadController {
     @FXML
     private HBox videoDownloadSceneTopHBox;
 
+    public Label getVideoDownloadSceneNameOfVideoLabel() {
+        return videoDownloadSceneNameOfVideoLabel;
+    }
+
     @FXML
     private Label videoDownloadSceneNameOfVideoLabel;
 
@@ -77,30 +79,43 @@ public class VideoDownloadController {
     @FXML
     private Label videoDownloadSceneInfoTopLabel;
 
+    public JFXTextArea getVideoDownloadSceneInfoTextArea() {
+        return videoDownloadSceneInfoTextArea;
+    }
+
     @FXML
     private JFXTextArea videoDownloadSceneInfoTextArea;
 
     @FXML
     private Label videoDownloadSceneCloseInfoButton;
 
-    @FXML
-    private Label videoDownloadSceneSynchLabel;
-
-    @FXML
-    private ImageView videoDownloadSceneUpdate;
-
-    @FXML
-    private ImageView videoDownloadSceneSynchImageView;
-
     private static Stage currentStage;
     private static Scene currentScene;
     private static Scene newScene;
+
+    public String linkForWatch;
+    public String subject;
+    public String topic;
+    public String subtopic;
+
+    VideoPlayerController videoPlayerControllerWhenSwitch;
+    VideoDownloadController videoDownloadControllerCurrent;
 
     @FXML
     private void switchingToTheVideoSelectionMenu(MouseEvent event) throws IOException {
         currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+        VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuFlowPane());
+
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setDisable(false);
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setDisable(false);
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setOpacity(1);
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setOpacity(1);
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().getItems().addAll(VideoSelectionMenuController.leftComboBox);
+        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().getItems().addAll(VideoSelectionMenuController.rightComboBox);
+        VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
         currentStage.setScene(newScene);
     }
 
@@ -111,6 +126,9 @@ public class VideoDownloadController {
         videoDownloadSceneTopHBox.setDisable(true);
         videoDownloadSceneRedVBox.setDisable(true);
         videoDownloadSceneRedVBox.setVisible(false);
+        videoDownloadSceneTopHBox.setOpacity(0.4);
+        videoDownloadSceneRedVBox.setOpacity(0.4);
+        videoDownloadSceneRedVBox.setOpacity(0.4);
     }
 
     @FXML
@@ -120,16 +138,91 @@ public class VideoDownloadController {
         videoDownloadSceneTopHBox.setDisable(false);
         videoDownloadSceneRedVBox.setDisable(false);
         videoDownloadSceneRedVBox.setVisible(true);
+        videoDownloadSceneTopHBox.setOpacity(1);
+        videoDownloadSceneRedVBox.setOpacity(1);
+        videoDownloadSceneRedVBox.setOpacity(1);
+    }
+
+    @FXML
+    private void openVideoInBrowser() throws URISyntaxException, IOException {
+        URI uri = new URI(linkForWatch);
+        Desktop.getDesktop().browse(uri);
+    }
+
+    @FXML
+    private void startDownloadVideo() {
+        if(videoDownloadSceneDownloadLabel.getText().equals("Отменить загрузку")) {
+            Platform.runLater(() -> {
+                videoDownloadSceneCentralLabel.setText("Видео не загружено");
+                videoDownloadSceneDownloadLabel.setText("Остановка загрузки");
+            });
+            DBInteraction.threadsForDownload.get(subtopic).interrupt();
+            DBInteraction.isVideoDownloading.put(subtopic, null);
+
+        } else if(videoDownloadSceneDownloadLabel.getText().equals("Скачать видео")) {
+            Thread threadForDownloadVideo = new Thread(() -> {
+                Platform.runLater(() -> {
+                    videoDownloadSceneOfflineModeButton.setVisible(false);
+                    videoDownloadSceneOfflineModeButton.setDisable(true);
+                    videoDownloadSceneCentralLabel.setText("Видео загружается");
+                    videoDownloadSceneGifImageView.setVisible(true);
+                    videoDownloadSceneDownloadLabel.setText("Отменить загрузку");
+                });
+                DBInteraction.videoDownloadController = this;
+                DBInteraction.downloadVideo(subject, topic, subtopic);
+                if(!Thread.currentThread().isInterrupted() && DBInteraction.isConn) {
+                    DBInteraction.isVideoDownloading.put(subtopic, false);
+                    Platform.runLater(() -> {
+                        videoDownloadSceneCentralLabel.setText("Видео загружено");
+                        videoDownloadSceneGifImageView.setVisible(false);
+                        videoDownloadSceneDownloadLabel.setText("Перейти к просмотру");
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        if(!DBInteraction.isConn) {
+                            videoDownloadSceneOfflineModeButton.setDisable(false);
+                            videoDownloadSceneOfflineModeButton.setVisible(true);
+                        }
+                        DBInteraction.isVideoDownloading.put(subtopic, null);
+                        videoDownloadSceneCentralLabel.setText("Видео не загружено");
+                        videoDownloadSceneGifImageView.setVisible(false);
+                        videoDownloadSceneDownloadLabel.setText("Скачать видео");
+                    });
+                }
+            });
+            DBInteraction.threadsForDownload.put(subtopic, threadForDownloadVideo);
+            DBInteraction.isVideoDownloading.put(subtopic, true);
+            DBInteraction.downloadScene.put(subtopic, videoDownloadSceneDownloadLabel.getScene());
+            threadForDownloadVideo.start();
+        } else if(videoDownloadSceneDownloadLabel.getText().equals("Перейти к просмотру")) {
+            currentStage = (Stage)((videoDownloadSceneDownloadHBox).getScene().getWindow());
+            FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
+            try {
+                newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            videoPlayerControllerWhenSwitch = fxmlLoader.getController();
+            videoPlayerControllerWhenSwitch.setPreviousScene("video-selection-menu-scene.fxml");
+
+            Scene finalNewScene = newScene;
+            Platform.runLater(() -> {
+                videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
+                videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
+                videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
+                videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+                videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
+                videoPlayerControllerWhenSwitch.isEducationVideo = true;
+                videoPlayerControllerWhenSwitch.urlOfVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).toURI().toString();
+                videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).getParent());
+                videoPlayerControllerWhenSwitch.restartPlayer();
+            });
+            currentStage.setScene(newScene);
+        }
     }
 
     @FXML
     void initialize() {
-        videoDownloadSceneSynchImageView.fitWidthProperty().bind(videoDownloadSceneBackButton.heightProperty());
-        videoDownloadSceneSynchImageView.fitHeightProperty().bind(videoDownloadSceneBackButton.heightProperty());
-
-        videoDownloadSceneUpdate.fitWidthProperty().bind(videoDownloadSceneBackButton.heightProperty());
-        videoDownloadSceneUpdate.fitHeightProperty().bind(videoDownloadSceneBackButton.heightProperty());
-
         videoDownloadSceneInfoButton.fitWidthProperty().bind(videoDownloadSceneBackButton.heightProperty());
         videoDownloadSceneInfoButton.fitHeightProperty().bind(videoDownloadSceneBackButton.heightProperty());
 
@@ -151,8 +244,6 @@ public class VideoDownloadController {
                 videoDownloadSceneBackButton.setPrefWidth(132);
                 videoDownloadSceneBackButton.setPrefHeight(27);
                 videoDownloadSceneBackButton.setFont(Font.font("Arial Black", 14));
-
-                videoDownloadSceneSynchLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
                 videoDownloadSceneRedVBox.setPrefWidth(450);
                 videoDownloadSceneRedVBox.setPrefHeight(250);
@@ -188,8 +279,6 @@ public class VideoDownloadController {
                 videoDownloadSceneBackButton.setPrefHeight(28);
                 videoDownloadSceneBackButton.setFont(Font.font("Arial Black", 15));
 
-                videoDownloadSceneSynchLabel.setFont(Font.font("Arial", FontWeight.BOLD, 15));
-
                 videoDownloadSceneRedVBox.setPrefWidth(523);
                 videoDownloadSceneRedVBox.setPrefHeight(290);
 
@@ -224,8 +313,6 @@ public class VideoDownloadController {
                 videoDownloadSceneBackButton.setPrefHeight(29);
                 videoDownloadSceneBackButton.setFont(Font.font("Arial Black", 16));
 
-                videoDownloadSceneSynchLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-
                 videoDownloadSceneRedVBox.setPrefWidth(596);
                 videoDownloadSceneRedVBox.setPrefHeight(331);
 
@@ -259,8 +346,6 @@ public class VideoDownloadController {
                 videoDownloadSceneBackButton.setPrefWidth(250);
                 videoDownloadSceneBackButton.setPrefHeight(30);
                 videoDownloadSceneBackButton.setFont(Font.font("Arial Black", 17));
-
-                videoDownloadSceneSynchLabel.setFont(Font.font("Arial", FontWeight.BOLD, 17));
 
                 videoDownloadSceneRedVBox.setPrefWidth(669);
                 videoDownloadSceneRedVBox.setPrefHeight(371);

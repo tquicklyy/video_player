@@ -8,7 +8,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -23,63 +22,6 @@
             <ScrollPane fx:id="videoSelectionMenuScrollPane" hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
                <content>
                   <FlowPane fx:id="videoSelectionMenuFlowPane" alignment="TOP_CENTER" hgap="64.0" prefHeight="400.0" prefWidth="691.0" style="-fx-background-color: white;" vgap="20.0">
-                     <children>
-                        <VBox fx:id="videoSelectionMenuVBox" alignment="CENTER" prefHeight="243.0" prefWidth="279.0" style="-fx-border-color: #FF4040; -fx-border-radius: 10px; -fx-background-color: #FF4040; -fx-background-radius: 10px;">
-                           <children>
-                              <ImageView fx:id="videoSelectionMenuImageView" fitHeight="150.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../images/Логос/1 Платформа .NET.png" />
-                                 </image>
-                                 <VBox.margin>
-                                    <Insets bottom="7.0" left="7.0" right="7.0" top="7.0" />
-                                 </VBox.margin>
-                              </ImageView>
-                              <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-                                 <children>
-                                    <Label fx:id="videoSelectionMenuNameOfVideoLabel" alignment="CENTER" prefHeight="16.0" prefWidth="217.0" style="-fx-background-color: #FF4040;" text="1 Платформа .NET" textFill="WHITE">
-                                       <font>
-                                          <Font name="Arial Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <HBox alignment="CENTER" prefHeight="40.0" prefWidth="246.0" spacing="10.0">
-                                       <children>
-                                          <Label fx:id="videoSelectionMenuLabelForWatch" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="179.0" style="-fx-background-color: white; -fx-background-radius: 7px; -fx-border-radius: 7px;" text="Посмотреть">
-                                             <font>
-                                                <Font name="Arial Bold" size="14.6" />
-                                             </font>
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </Label>
-                                          <ImageView fx:id="videoSelectionMenuInfoButton" fitHeight="31.0" fitWidth="37.0" onMousePressed="#openInfo" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../../images/info-red-i.png" />
-                                             </image>
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ImageView>
-                                          <ImageView fx:id="videoSelectionMenuImageViewForDelete" fitHeight="31.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../../images/delete.png" />
-                                             </image>
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ImageView>
-                                       </children>
-                                       <VBox.margin>
-                                          <Insets left="10.0" right="10.0" />
-                                       </VBox.margin>
-                                    </HBox>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </VBox>
-                           </children>
-                        </VBox>
-                     </children>
                      <padding>
                         <Insets top="5.0" />
                      </padding>
@@ -94,7 +36,7 @@
                      <children>
                         <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Label fx:id="videoSelectionMenuBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheMainMenu" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Назад" textAlignment="JUSTIFY" textFill="WHITE">
+                              <Label fx:id="videoSelectionMenuBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheMainMenu" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="На главную" textAlignment="JUSTIFY" textFill="WHITE">
                                  <font>
                                     <Font name="Arial Black" size="14.0" />
                                  </font>
@@ -109,20 +51,15 @@
                         </VBox>
                         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Label fx:id="videoSelectionMenuSynchLabel" text="Синхронизация" textFill="WHITE">
+                              <Label fx:id="videoSelectionMenuOfflineModeButton" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="176.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Автономный режим" textAlignment="JUSTIFY" textFill="WHITE" visible="false">
                                  <font>
-                                    <Font name="Arial Bold" size="14.0" />
+                                    <Font name="Arial Black" size="14.0" />
                                  </font>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
                               </Label>
-                              <ImageView fx:id="videoSelectionMenuSynchImageView" fitHeight="27.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../images/loading-circle.gif" />
-                                 </image>
-                                 <HBox.margin>
-                                    <Insets />
-                                 </HBox.margin>
-                              </ImageView>
-                              <ImageView fx:id="videoSelectionMenuUpdate" fitHeight="27.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="videoSelectionMenuUpdate" fitHeight="27.0" fitWidth="27.0" onMousePressed="#startSynchronize" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../images/update.png" />
                                  </image>
@@ -146,9 +83,9 @@
                                     <Font name="Arial Bold" size="13.0" />
                                  </font>
                               </Label>
-                              <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="27.0" prefWidth="246.0">
+                              <StackPane prefHeight="27.0" prefWidth="246.0">
                                  <children>
-                                    <ComboBox fx:id="videoSelectionMenuLeftComboBox" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="246.0" promptText="Тема" style="-fx-font-size: 13; -fx-background-color: #FF4040; -fx-fill: white;" styleClass="combo-box" stylesheets="@../../../cssStyle/videoSelectionMenuComboBox.css">
+                                    <ComboBox fx:id="videoSelectionMenuLeftComboBox" disable="true" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="246.0" style="-fx-font-size: 13; -fx-background-color: #FF4040; -fx-fill: white;" styleClass="combo-box" stylesheets="@../../../cssStyle/videoSelectionMenuComboBox.css">
                                        <opaqueInsets>
                                           <Insets />
                                        </opaqueInsets>
@@ -156,8 +93,16 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ComboBox>
+                                    <Label fx:id="videoSelectionMenuLeftComboBoxPromptLabel" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="245.0" text="Тема" textFill="WHITE">
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <font>
+                                          <Font name="Arial Bold" size="12.0" />
+                                       </font>
+                                    </Label>
                                  </children>
-                              </AnchorPane>
+                              </StackPane>
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="2.0" HBox.hgrow="ALWAYS">
@@ -167,9 +112,9 @@
                                     <Font name="Arial Bold" size="13.0" />
                                  </font>
                               </Label>
-                              <AnchorPane fx:id="videoSelectionMenuRightAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="27.0" prefWidth="246.0">
+                              <StackPane prefHeight="150.0" prefWidth="200.0">
                                  <children>
-                                    <ComboBox fx:id="videoSelectionMenuRightComboBox" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="246.0" promptText="Подпункт темы" style="-fx-font-size: 15; -fx-background-color: #FF4040;" styleClass="combo-box" stylesheets="@../../../cssStyle/videoSelectionMenuComboBox.css">
+                                    <ComboBox fx:id="videoSelectionMenuRightComboBox" disable="true" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="27.0" prefWidth="246.0" style="-fx-font-size: 15; -fx-background-color: #FF4040;" stylesheets="@../../../cssStyle/videoSelectionMenuComboBox.css">
                                        <opaqueInsets>
                                           <Insets />
                                        </opaqueInsets>
@@ -177,8 +122,16 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ComboBox>
+                                    <Label fx:id="videoSelectionMenuRightComboBoxPromptLabel" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="245.0" text="Подпункт темы" textFill="WHITE">
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <font>
+                                          <Font name="Arial Bold" size="12.0" />
+                                       </font>
+                                    </Label>
                                  </children>
-                              </AnchorPane>
+                              </StackPane>
                            </children>
                         </VBox>
                      </children>
@@ -190,17 +143,17 @@
             </VBox>
          </top>
       </BorderPane>
-      <VBox fx:id="videoSelectionMenuInfoVBox" alignment="TOP_CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="296.0" prefWidth="538.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-color: black; -fx-border-radius: 10px; -fx-border-width: 2px;" visible="false">
+      <VBox fx:id="videoSelectionMenuInfoVBox" alignment="TOP_CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="518.0" spacing="5.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-color: black; -fx-border-radius: 10px; -fx-border-width: 2px;" visible="false">
          <children>
             <Label fx:id="videoSelectionMenuInfoTopLabel" text="Информация о видео">
                <font>
                   <Font name="Arial Bold" size="14.0" />
                </font>
                <VBox.margin>
-                  <Insets top="10.0" />
+                  <Insets bottom="5.0" top="5.0" />
                </VBox.margin>
             </Label>
-            <JFXTextArea fx:id="videoSelectionMenuInfoTextArea" editable="false" focusColor="BLACK" prefHeight="271.0" prefWidth="410.0" style="-fx-text-fill: black;" text="Глава: Программирование&#10;Тема: Платформа .NET&#10;Название видео: Платформа .NET&#10;Длительность: 03:04&#10;Ссылка на видео в telegram: https://t.me/c/2377706406/10&#10;Ссылка на бота в telegram: @kubstu_education_bot&#10;Ссылка на группу ВК: https://vk.com/club227646062&#10;Ссылка на видео в ВК: https://vk.com/video-227646062_456239022" unFocusColor="BLACK">
+            <JFXTextArea fx:id="videoSelectionMenuInfoTextArea" editable="false" focusColor="BLACK" prefHeight="271.0" prefWidth="410.0" style="-fx-text-fill: black;" text="Глава: Программирование&#10;Тема: Платформа .NET&#10;Название видео: Платформа .NET&#10;Ссылка на видео в telegram: https://t.me/c/2377706406/10&#10;Ссылка на бота в telegram: @kubstu_education_bot&#10;Ссылка на группу ВК: https://vk.com/club227646062&#10;Ссылка на видео в ВК: https://vk.com/video-227646062_456239022" unFocusColor="BLACK">
                <font>
                   <Font name="Arial Bold" size="14.0" />
                </font>
@@ -213,12 +166,55 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
                <VBox.margin>
-                  <Insets bottom="10.0" />
+                  <Insets bottom="5.0" top="10.0" />
                </VBox.margin>
             </Label>
          </children>
          <padding>
             <Insets left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+      <VBox fx:id="videoSelectionMenuDeleteVBox" alignment="TOP_CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="157.0" prefWidth="518.0" spacing="5.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-color: black; -fx-border-radius: 10px; -fx-border-width: 2px;" visible="false">
+         <children>
+            <Label fx:id="videoSelectionMenuDeleteTopLabel" alignment="CENTER" prefHeight="16.0" prefWidth="784.0" text="Удаление видео" wrapText="true">
+               <font>
+                  <Font name="Arial Bold" size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Label>
+            <Label fx:id="videoSelectionMenuDeleteCenterLabel" alignment="CENTER" prefHeight="568.0" prefWidth="494.0" text="Вы действительно хотите удалить это видео?" wrapText="true" VBox.vgrow="ALWAYS">
+               <font>
+                  <Font name="Arial Bold" size="14.0" />
+               </font>
+            </Label>
+            <HBox alignment="CENTER" prefHeight="58.0" prefWidth="494.0" spacing="20.0">
+               <children>
+                  <Label fx:id="videoSelectionMenuConfirmLabel" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#deleteVideo" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: red; -fx-border-radius: 7px; -fx-border-width: 1.5px; -fx-background-color: red; -fx-background-radius: 7px;" text="Подтвердить" textAlignment="JUSTIFY" textFill="WHITE">
+                     <font>
+                        <Font name="Arial Black" size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Label>
+                  <Label fx:id="videoSelectionMenuCancelLabel" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#closeVideoSelectionMenuDeleteVBox" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: black; -fx-border-radius: 7px; -fx-border-width: 1.5px;" text="Отмена" textAlignment="JUSTIFY">
+                     <font>
+                        <Font name="Arial Black" size="14.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
       </VBox>
    </children>
