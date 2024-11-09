@@ -33,10 +33,10 @@ public class VideoPlayerController {
 
 
     @FXML
-    private Label videoPlayerSceneAnotherVideoButton;
+    public Label videoPlayerSceneAnotherVideoButton;
 
     @FXML
-    private Label videoPlayerSceneBackButton;
+    public Label videoPlayerSceneBackButton;
 
     @FXML
     private Label videoPlayerSceneCurrentTimeLabel;
@@ -186,6 +186,8 @@ public class VideoPlayerController {
 
     private VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch;
 
+    public String subtopic;
+
     private static Alert alertWithVideo;
 
     @FXML
@@ -200,22 +202,22 @@ public class VideoPlayerController {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
         if(previousScene.equals("video-selection-menu-scene.fxml")) {
-            VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+            videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
             VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuFlowPane());
-
+            VideoSelectionMenuController.isLeftComboBoxUpdateWhileChangeScene = true;
+            VideoSelectionMenuController.isRightComboBoxUpdateWhileChangeScene = true;
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setValue(VideoSelectionMenuController.lastSubjectHashMap.get(subtopic));
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setValue(VideoSelectionMenuController.lastTopicHashMap.get(subtopic));
 
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setDisable(false);
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setDisable(false);
-            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setOpacity(1);
-            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setOpacity(1);
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().getItems().addAll(VideoSelectionMenuController.leftComboBox);
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().getItems().addAll(VideoSelectionMenuController.rightComboBox);
             VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setVisible(false);
+            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setVisible(false);
         }
-
-        Platform.runLater(() -> {
-            currentStage.setScene(newScene);
-        });
+        currentStage.setScene(newScene);
     }
 
     @FXML

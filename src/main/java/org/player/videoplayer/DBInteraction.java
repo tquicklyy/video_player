@@ -1,10 +1,13 @@
 package org.player.videoplayer;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -36,7 +39,6 @@ public class DBInteraction {
 
     public static HashMap<String, Thread> threadsForDownload = new HashMap<>();
     public static HashMap<String, Boolean> isVideoDownloading = new HashMap<>();
-    public static HashMap<String, Scene> downloadScene = new HashMap<>();
 
     public static int getIdByNameOfSubject(String subject) {
         return idOfSubjects.get(subject);
@@ -46,8 +48,10 @@ public class DBInteraction {
         return idOfTopics.get(topic);
     }
 
+    public static boolean isOfflineMode;
     public static boolean isConn;
-    public static VideoDownloadController videoDownloadController;
+
+    private static PauseTransition pauseForStopDownload;
 
     public static void alertOn(String info) {
         Platform.runLater(() -> {
@@ -129,19 +133,21 @@ public class DBInteraction {
             downloadUrl = new HashMap<>();
             idOfSubtopics = new HashMap<>();
 
+            int index = 0;
             while (resultSetForDB.next()) {
-                nameOfSubtopics.add(resultSetForDB.getString("subtopic"));
+                index++;
+                nameOfSubtopics.add(index + " " + resultSetForDB.getString("subtopic"));
                 telergramMessageUrl.put(resultSetForDB.getString("subtopic"), resultSetForDB.getString("telegram_message_url"));
-                videoUrl.put(resultSetForDB.getString("subtopic"), resultSetForDB.getString("video_url"));
-                downloadUrl.put(resultSetForDB.getString("subtopic"), resultSetForDB.getString("download_url"));
-                imageUrl.put(resultSetForDB.getString("subtopic"),resultSetForDB.getString("image_url"));
-                idOfSubtopics.put(resultSetForDB.getString("subtopic"), resultSetForDB.getInt("id"));
-                File fileToSave = new File(String.format("../Materials/%s/%s/%s/%s.json", subject, topic, resultSetForDB.getString("subtopic"),resultSetForDB.getString("subtopic")));
+                videoUrl.put(index + " " + resultSetForDB.getString("subtopic"), resultSetForDB.getString("video_url"));
+                downloadUrl.put(index + " " + resultSetForDB.getString("subtopic"), resultSetForDB.getString("download_url"));
+                imageUrl.put(index + " " + resultSetForDB.getString("subtopic"),resultSetForDB.getString("image_url"));
+                idOfSubtopics.put(index + " " + resultSetForDB.getString("subtopic"), resultSetForDB.getInt("id"));
+                File fileToSave = new File(String.format("../Materials/%s/%s/%s/%s.json", subject, topic, index + " " + resultSetForDB.getString("subtopic"), index + " " + resultSetForDB.getString("subtopic")));
                 if (!fileToSave.getParentFile().exists()) {
                     fileToSave.getParentFile().mkdirs();
                 }
                 try(FileWriter writer = new FileWriter(fileToSave)) {
-                    String info = String.format("Глава: %s\nТема: %s\nНазвание видео: %s\nСсылка на видео в telegram: %s\nСсылка на видео в ВК: %s\nСсылка на бота в telegram: @kubstu_education_bot\nСсылка на группу ВК: https://vk.com/club227646062", subject, topic, resultSetForDB.getString("subtopic"), DBInteraction.telergramMessageUrl.get(resultSetForDB.getString("subtopic")), DBInteraction.videoUrl.get(resultSetForDB.getString("subtopic")));
+                    String info = String.format("Глава: %s\nТема: %s\nНомер видео: %s\nНазвание видео: %s\nСсылка на видео в telegram: %s\nСсылка на видео в ВК: %s\nСсылка на бота в telegram: @kubstu_education_bot\nСсылка на группу ВК: https://vk.com/club227646062", subject, topic, index, resultSetForDB.getString("subtopic"), DBInteraction.telergramMessageUrl.get(resultSetForDB.getString("subtopic")), DBInteraction.videoUrl.get(resultSetForDB.getString("subtopic")));
                     writer.write(info);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -168,7 +174,19 @@ public class DBInteraction {
                 if(!fileToSave.exists()) {
                     download(urlOfVideo, fileToSave);
                 }
-                if(!Thread.currentThread().isInterrupted())VideoSelectionMenuController.deleteImageViewHashMap.get(subtopic).setImage(new Image(DBInteraction.class.getResource("/images/delete-red.png").toString()));
+
+                if(!Thread.currentThread().isInterrupted()) {
+                    VideoSelectionMenuController.deleteImageViewHashMap.get(subtopic).setImage(new Image(DBInteraction.class.getResource("/images/delete-red.png").toString()));
+                    Platform.runLater(() -> {
+                        pauseForStopDownload = new PauseTransition(Duration.millis(1000));
+                        pauseForStopDownload.setOnFinished(_ -> {
+                            System.out.println("я да");
+                            VideoDownloadController.videoDownloadSceneCentralLabelHashMap.get(subtopic).setText("Видео не загружено");
+                            VideoDownloadController.videoDownloadSceneGifImageViewHashMap.get(subtopic).setVisible(false);
+                            VideoDownloadController.videoDownloadSceneDownloadLabelHashMap.get(subtopic).setText("Скачать видео");
+                        });
+                    });
+                }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -202,8 +220,8 @@ public class DBInteraction {
         HttpsURLConnection connectionForDownload = (HttpsURLConnection) urlForContent.openConnection();
         connectionForDownload.setRequestMethod("GET");
         connectionForDownload.setRequestProperty("User-Agent","Mozilla/5.0");
-        connectionForDownload.setConnectTimeout(10000);
-        connectionForDownload.setReadTimeout(10000);
+        connectionForDownload.setConnectTimeout(7000);
+        connectionForDownload.setReadTimeout(7000);
         try(BufferedInputStream inRead = new BufferedInputStream(connectionForDownload.getInputStream());
             FileOutputStream fileToWrite = new FileOutputStream(fileToSave)) {
             byte[] buffer = new byte[8192];
@@ -218,18 +236,13 @@ public class DBInteraction {
             }
             if(Thread.currentThread().isInterrupted()) return;
             alertOn("Не удалось скачать необходимые файлы.");
+            Thread.currentThread().interrupt();
             isConn = false;
             return;
         }
         if (Thread.currentThread().isInterrupted()) {
             fileToSave.delete();
         }
-        if(fileToSave.getName().endsWith(".mp4")) {
-            Platform.runLater(() -> {
-                videoDownloadController.videoDownloadSceneCentralLabel.setText("Видео не загружено");
-                videoDownloadController.videoDownloadSceneGifImageView.setVisible(false);
-                videoDownloadController.videoDownloadSceneDownloadLabel.setText("Скачать видео");
-            });
-        }
+
     }
 }

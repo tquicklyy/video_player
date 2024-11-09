@@ -18,7 +18,7 @@
          <children>
             <VBox alignment="CENTER_LEFT" prefHeight="39.0" prefWidth="0.0" HBox.hgrow="ALWAYS">
                <children>
-                  <Label fx:id="videoDownloadSceneBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheVideoSelectionMenu" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Назад" textAlignment="JUSTIFY" textFill="WHITE">
+                  <Label fx:id="videoDownloadSceneBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheVideoSelectionMenu" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Список видео" textAlignment="JUSTIFY" textFill="WHITE">
                      <font>
                         <Font name="Arial Black" size="14.0" />
                      </font>
@@ -35,7 +35,7 @@
                <children>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Label fx:id="videoDownloadSceneOfflineModeButton" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheVideoSelectionMenu" prefHeight="27.0" prefWidth="176.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Автономный режим" textAlignment="JUSTIFY" textFill="WHITE" visible="false">
+                        <Label fx:id="videoDownloadSceneOfflineModeButton" alignment="CENTER" contentDisplay="CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#offlineModeActivateDownloadScene" prefHeight="27.0" prefWidth="176.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="Автономный режим" textAlignment="JUSTIFY" textFill="WHITE" visible="false">
                            <font>
                               <Font name="Arial Black" size="14.0" />
                            </font>
@@ -64,81 +64,7 @@
    <center>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="root" stylesheets="@../../../cssStyle/mainMenuBorderPane.css">
-               <children>
-                  <VBox fx:id="videoDownloadSceneRedVBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="450.0" spacing="15.0" style="-fx-background-color: #9A9999; -fx-background-radius: 10px;">
-                     <children>
-                        <Label fx:id="videoDownloadSceneNameOfVideoLabel" text="1 Платформа .NET">
-                           <font>
-                              <Font name="Arial Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="videoDownloadSceneCentralLabel" text="Видео не загружено">
-                           <font>
-                              <Font name="Arial Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <HBox fx:id="videoDownloadSceneDownloadHBox" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" onMousePressed="#startDownloadVideo" prefHeight="35.0" prefWidth="233.0" style="-fx-background-color: white; -fx-background-radius: 7px;">
-                           <children>
-                              <ImageView fx:id="videoDownloadSceneDownloadImageView" fitHeight="22.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../images/download.png" />
-                                 </image>
-                                 <cursor>
-                                    <Cursor fx:constant="HAND" />
-                                 </cursor>
-                              </ImageView>
-                              <Label fx:id="videoDownloadSceneDownloadLabel" alignment="CENTER" prefHeight="32.0" prefWidth="210.0" style="-fx-background-color: white; -fx-background-radius: 7px;" text="Скачать видео">
-                                 <font>
-                                    <Font name="Arial Bold" size="14.0" />
-                                 </font>
-                                 <cursor>
-                                    <Cursor fx:constant="HAND" />
-                                 </cursor>
-                              </Label>
-                           </children>
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
-                           <padding>
-                              <Insets left="5.0" right="5.0" />
-                           </padding>
-                        </HBox>
-                        <HBox fx:id="videoDownloadSceneOnlineWatchHBox" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" onMousePressed="#openVideoInBrowser" prefHeight="35.0" prefWidth="233.0" style="-fx-background-color: white; -fx-background-radius: 7px;">
-                           <children>
-                              <ImageView fx:id="videoDownloadSceneOnlineWatchImageView" fitHeight="22.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../images/link.png" />
-                                 </image>
-                                 <cursor>
-                                    <Cursor fx:constant="HAND" />
-                                 </cursor>
-                              </ImageView>
-                              <Label fx:id="videoDownloadSceneOnlineWatchLabel" alignment="CENTER" prefHeight="32.0" prefWidth="230.0" style="-fx-background-color: white; -fx-background-radius: 7px;" text="Посмотреть онлайн">
-                                 <font>
-                                    <Font name="Arial Bold" size="14.0" />
-                                 </font>
-                                 <cursor>
-                                    <Cursor fx:constant="HAND" />
-                                 </cursor>
-                              </Label>
-                           </children>
-                           <padding>
-                              <Insets left="5.0" right="5.0" />
-                           </padding>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </HBox>
-                        <ImageView fx:id="videoDownloadSceneGifImageView" disable="true" fitHeight="17.0" fitWidth="154.4" pickOnBounds="true" preserveRatio="true" visible="false">
-                           <image>
-                              <Image url="@../../../images/loading-bar.gif" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </VBox>
-               </children>
-            </VBox>
+            <VBox fx:id="videoDownloadSceneCentralVBox" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="root" stylesheets="@../../../cssStyle/mainMenuBorderPane.css" />
             <VBox fx:id="videoDownloadSceneInfoVBox" alignment="TOP_CENTER" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="518.0" spacing="5.0" style="-fx-background-color: white; -fx-background-radius: 10px; -fx-border-color: black; -fx-border-radius: 10px; -fx-border-width: 2px;" visible="false">
                <children>
                   <Label fx:id="videoDownloadSceneInfoTopLabel" text="Информация о видео">

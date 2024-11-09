@@ -56,6 +56,7 @@ public class MainMenuController {
         currentStage.setScene(newScene);
 
         Platform.runLater(() -> {
+            videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("На главную");
             videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
             videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
             videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
