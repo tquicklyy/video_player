@@ -107,7 +107,7 @@
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="2.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Label fx:id="videoSelectionMenuRightLabelForComboBox" alignment="CENTER" prefHeight="27.0" prefWidth="246.0" text="Подпункт темы">
+                              <Label fx:id="videoSelectionMenuRightLabelForComboBox" alignment="CENTER" prefHeight="27.0" prefWidth="246.0" text="Подтема">
                                  <font>
                                     <Font name="Arial Bold" size="13.0" />
                                  </font>
@@ -122,7 +122,7 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ComboBox>
-                                    <Label fx:id="videoSelectionMenuRightComboBoxPromptLabel" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="245.0" text="Подпункт темы" textFill="WHITE">
+                                    <Label fx:id="videoSelectionMenuRightComboBoxPromptLabel" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="245.0" text="Подтема" textFill="WHITE">
                                        <padding>
                                           <Insets left="10.0" />
                                        </padding>

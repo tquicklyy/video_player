@@ -39,19 +39,18 @@ public class VideoPlayerApplication extends Application {
             alert.setHeaderText("Вы действительно хотите закрыть программу?");
             alert.setContentText("Данное действие может привести к потере данных.");
 
-            ButtonType yesButton = new ButtonType("Подвердить",ButtonType.OK.getButtonData());
+            ButtonType yesButton = new ButtonType("Подвердить", ButtonType.OK.getButtonData());
             ButtonType noButton = new ButtonType("Отмена", ButtonType.CANCEL.getButtonData());
 
             alert.getButtonTypes().setAll(yesButton, noButton);
             alert.initOwner(mainMenuStage);
-            alert.setOnCloseRequest(_ -> {
-                alert.close();
-            });
+
             alert.showAndWait().ifPresent(response -> {
                 if(response == noButton || response.getButtonData().isCancelButton()) {
                     event.consume();
                     return;
                 }
+
                 if(DBInteraction.nameOfSubtopics != null) {
                     for(String subtopic: DBInteraction.nameOfSubtopics) {
                         if (DBInteraction.isVideoDownloading.get(subtopic) != null && DBInteraction.isVideoDownloading.get(subtopic)) {
@@ -64,17 +63,26 @@ public class VideoPlayerApplication extends Application {
                         }
                     }
                 }
-                if(VideoSelectionMenuController.isThreadForDownloadImageActive) VideoSelectionMenuController.threadForDownloadImage.interrupt();
-                if(VideoSelectionMenuController.isThreadForSynchronizeActive) VideoSelectionMenuController.threadForSynchronize.interrupt();
-                if(VideoSelectionMenuController.isThreadForCreateVBoxBySubtopicActive) VideoSelectionMenuController.threadForCreateVBoxBySubtopic.interrupt();
-                if(VideoSelectionMenuController.isThreadForCreateVBoxByDirectoriesActive) VideoSelectionMenuController.threadForCreateVBoxByDirectories.interrupt();
+
                 try {
-                    if(VideoSelectionMenuController.isThreadForDownloadImageActive) VideoSelectionMenuController.threadForDownloadImage.join();
-                    if(VideoSelectionMenuController.isThreadForSynchronizeActive) VideoSelectionMenuController.threadForSynchronize.join();
-                    if(VideoSelectionMenuController.isThreadForCreateVBoxBySubtopicActive) VideoSelectionMenuController.threadForCreateVBoxBySubtopic.join();
-                    if(VideoSelectionMenuController.isThreadForCreateVBoxByDirectoriesActive) VideoSelectionMenuController.threadForCreateVBoxByDirectories.join();
+                    if(VideoSelectionMenuController.isThreadForDownloadImageActive) {
+                        VideoSelectionMenuController.threadForDownloadImage.interrupt();
+                        VideoSelectionMenuController.threadForDownloadImage.join();
+                    }
+                    if(VideoSelectionMenuController.isThreadForSynchronizeActive) {
+                        VideoSelectionMenuController.threadForSynchronize.interrupt();
+                        VideoSelectionMenuController.threadForSynchronize.join();
+                    }
+                    if(VideoSelectionMenuController.isThreadForCreateVBoxBySubtopicActive) {
+                        VideoSelectionMenuController.threadForCreateVBoxBySubtopic.interrupt();
+                        VideoSelectionMenuController.threadForCreateVBoxBySubtopic.join();
+                    }
+                    if(VideoSelectionMenuController.isThreadForCreateVBoxByDirectoriesActive) {
+                        VideoSelectionMenuController.threadForCreateVBoxByDirectories.interrupt();
+                        VideoSelectionMenuController.threadForCreateVBoxByDirectories.join();
+                    }
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    System.out.println("Ошибка закрытия приложения: " + e);
                 }
                 System.exit(0);
             });
@@ -93,7 +101,6 @@ public class VideoPlayerApplication extends Application {
         mainMenuStage.yProperty().addListener(mainMenuStagePositionChangeListener);
 
         mainMenuStage.show();
-
     }
 
     private void resetTimerForMainMenuStageDragging(Stage stage) {

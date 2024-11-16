@@ -97,9 +97,6 @@ public class VideoSelectionMenuController {
     private Label videoSelectionMenuDeleteCenterLabel;
 
     @FXML
-    private JFXTextArea videoSelectionMenuDeleteTextArea;
-
-    @FXML
     private ComboBox<String> videoSelectionMenuRightComboBox;
 
     @FXML
@@ -165,9 +162,6 @@ public class VideoSelectionMenuController {
 
     public static String subject;
     public static String topic;
-
-    public static String lastSubject;
-    public static String lastTopic;
 
     private static Alert alertForSomething;
 
@@ -337,7 +331,7 @@ public class VideoSelectionMenuController {
         pauseForDispose = new PauseTransition(Duration.millis(750));
         pauseForDispose.setOnFinished(_ -> {
             threadForSynchronize = new Thread(() -> {
-                DBInteraction.connectToDB("read_only");
+                DBInteraction.connectToDB();
                 if(DBInteraction.isConn) {
                     DBInteraction.getSubjects(videoSelectionMenuLeftComboBox);
                     if(DBInteraction.isConn) {
@@ -387,7 +381,7 @@ public class VideoSelectionMenuController {
         pauseForDispose = new PauseTransition(Duration.millis(750));
         pauseForDispose.setOnFinished(_ -> {
             threadForSynchronize = new Thread(() -> {
-                DBInteraction.getTopics(DBInteraction.getIdByNameOfSubject(videoSelectionMenuLeftComboBox.getValue()), videoSelectionMenuRightComboBox);
+                DBInteraction.getTopics(DBInteraction.idOfSubjects.get(videoSelectionMenuLeftComboBox.getValue()), videoSelectionMenuRightComboBox);
                 if(DBInteraction.isConn) {
                     Platform.runLater(() -> {
                         videoSelectionMenuLeftComboBox.setDisable(false);
@@ -847,12 +841,11 @@ public class VideoSelectionMenuController {
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
-                    videoDownloadControllerWhenSwitch.getVideoDownloadSceneInfoTextArea().setText(info);
+                    videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info);
 
                     videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
                     videoDownloadControllerWhenSwitch.subject = subject;
                     videoDownloadControllerWhenSwitch.topic = topic;
-                    videoDownloadControllerWhenSwitch.subtopic = subtopic;
                     currentStage.setScene(newScene);
                     Scene finalNewScene1 = newScene;
                     Platform.runLater(() -> {
@@ -883,12 +876,11 @@ public class VideoSelectionMenuController {
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
-                    videoDownloadControllerWhenSwitch.getVideoDownloadSceneInfoTextArea().setText(info);
+                    videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info);
 
                     videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
                     videoDownloadControllerWhenSwitch.subject = subject;
                     videoDownloadControllerWhenSwitch.topic = topic;
-                    videoDownloadControllerWhenSwitch.subtopic = subtopic;
                     currentStage.setScene(newScene);
                     Scene finalNewScene1 = newScene;
                     Platform.runLater(() -> {
@@ -1084,7 +1076,7 @@ public class VideoSelectionMenuController {
                     pauseForDispose = new PauseTransition(Duration.millis(750));
                     pauseForDispose.setOnFinished(_ -> {
                         threadForSynchronize = new Thread(() -> {
-                            DBInteraction.getSubtopics(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue(), DBInteraction.getIdByNameOfTopic(videoSelectionMenuRightComboBox.getValue()));
+                            DBInteraction.getSubtopics(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
                             isThreadForSynchronizeActive = false;
                         });
                         isThreadForSynchronizeActive = true;
@@ -1137,7 +1129,6 @@ public class VideoSelectionMenuController {
                         });
                         isThreadForDownloadImageActive = true;
                         threadForDownloadImage.start();
-
 
                     });
                     pauseForDispose.play();

@@ -31,6 +31,14 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </Label>
+            <Label fx:id="mainMenuFourthLabel" alignment="CENTER" onMousePressed="#switchingToTheInfoAboutPlayer" prefHeight="32.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: black; -fx-background-radius: 7px; -fx-border-radius: 7px;" text="О программе">
+               <font>
+                  <Font name="Arial Bold" size="13.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Label>
          </children>
       </VBox>
    </center>

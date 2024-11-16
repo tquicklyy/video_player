@@ -15,7 +15,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -25,8 +24,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class VideoDownloadController {
 
@@ -37,16 +36,10 @@ public class VideoDownloadController {
     private Label videoDownloadSceneOfflineModeButton;
 
     @FXML
-    public Label videoDownloadSceneDownloadLabel;
-
-
-    @FXML
     private ImageView videoDownloadSceneInfoButton;
-
 
     @FXML
     private HBox videoDownloadSceneTopHBox;
-
 
     @FXML
     private BorderPane videoDownloadSceneBorderPane;
@@ -57,27 +50,20 @@ public class VideoDownloadController {
     @FXML
     private Label videoDownloadSceneInfoTopLabel;
 
-    public JFXTextArea getVideoDownloadSceneInfoTextArea() {
-        return videoDownloadSceneInfoTextArea;
-    }
-
     @FXML
-    private JFXTextArea videoDownloadSceneInfoTextArea;
+    public JFXTextArea videoDownloadSceneInfoTextArea;
 
     @FXML
     private Label videoDownloadSceneCloseInfoButton;
 
     @FXML
     public VBox videoDownloadSceneCentralVBox;
-
-    private static Stage currentStage;
-    private static Scene currentScene;
+    
     private static Scene newScene;
 
     public String linkForWatch;
     public String subject;
     public String topic;
-    public String subtopic;
 
     public static HashMap<String, VideoDownloadController> videoDownloadControllerHashMap = new HashMap<>();
     public static HashMap<String, VBox> videoDownloadSceneRedVBoxHashMap = new HashMap<>();
@@ -86,17 +72,12 @@ public class VideoDownloadController {
     public static HashMap<String, HBox> videoDownloadSceneDownloadHBoxHashMap = new HashMap<>();
     public static HashMap<String, ImageView> videoDownloadSceneDownloadImageViewHashMap = new HashMap<>();
     public static HashMap<String, Label> videoDownloadSceneDownloadLabelHashMap = new HashMap<>();
-    public static HashMap<String, HBox> videoDownloadSceneOnlineWatchHBoxHashMap = new HashMap<>();
-    public static HashMap<String, ImageView> videoDownloadSceneOnlineWatchImageViewHashMap = new HashMap<>();
-    public static HashMap<String, Label> videoDownloadSceneOnlineWatchLabelHashMap = new HashMap<>();
     public static HashMap<String, ImageView> videoDownloadSceneGifImageViewHashMap = new HashMap<>();
 
-
     @FXML
-    private void switchingToTheVideoSelectionMenu(MouseEvent event) throws IOException {
-        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+    private void switchingToTheVideoSelectionMenu() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
-        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+        newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
         VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
         VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuFlowPane());
 
@@ -111,30 +92,13 @@ public class VideoDownloadController {
 
         videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().getItems().addAll(VideoSelectionMenuController.leftComboBox);
         videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().getItems().addAll(VideoSelectionMenuController.rightComboBox);
+
         VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
-        currentStage.setScene(newScene);
+        MainMenuController.currentStage.setScene(newScene);
+
         Platform.runLater(() -> {
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setVisible(false);
             videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setVisible(false);
-            if(DBInteraction.isOfflineMode) {
-                videoSelectionMenuControllerWhenSwitch.offlineModeActivateSelectionScene();
-            }
-        });
-    }
-
-
-    private void switchingToTheVideoSelectionMenuWhenOfflineModeActivate(MouseEvent event) throws IOException {
-        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
-        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-        VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
-
-        VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
-        currentStage.setScene(newScene);
-        Platform.runLater(() -> {
-            videoSelectionMenuControllerWhenSwitch.offlineModeActivateSelectionScene();
-            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
-            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setVisible(true);
         });
     }
 
@@ -144,6 +108,22 @@ public class VideoDownloadController {
         switchingToTheVideoSelectionMenuWhenOfflineModeActivate(event);
     }
 
+    private void switchingToTheVideoSelectionMenuWhenOfflineModeActivate(MouseEvent event) throws IOException {
+        MainMenuController.currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
+        newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+        VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+
+        VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
+        MainMenuController.currentStage.setScene(newScene);
+
+        Platform.runLater(() -> {
+            videoSelectionMenuControllerWhenSwitch.offlineModeActivateSelectionScene();
+
+            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
+            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setVisible(true);
+        });
+    }
 
     @FXML
     private void openInfo() {
@@ -152,7 +132,9 @@ public class VideoDownloadController {
         videoDownloadSceneTopHBox.setDisable(true);
         videoDownloadSceneCentralVBox.getChildren().getFirst().setDisable(true);
         videoDownloadSceneCentralVBox.getChildren().getFirst().setVisible(false);
+
         videoDownloadSceneTopHBox.setOpacity(0.4);
+        videoDownloadSceneInfoButton.setOpacity(0.4);
         videoDownloadSceneCentralVBox.setOpacity(0.4);
         videoDownloadSceneCentralVBox.setOpacity(0.4);
     }
@@ -164,7 +146,9 @@ public class VideoDownloadController {
         videoDownloadSceneTopHBox.setDisable(false);
         videoDownloadSceneCentralVBox.getChildren().getFirst().setDisable(false);
         videoDownloadSceneCentralVBox.getChildren().getFirst().setVisible(true);
+
         videoDownloadSceneTopHBox.setOpacity(1);
+        videoDownloadSceneInfoButton.setOpacity(1);
         videoDownloadSceneCentralVBox.setOpacity(1);
         videoDownloadSceneCentralVBox.setOpacity(1);
     }
@@ -174,17 +158,15 @@ public class VideoDownloadController {
             URI uri = new URI(linkForWatch);
             Desktop.getDesktop().browse(uri);
         } catch (Exception e) {
-
+            System.out.println("Ошибка открытия видео в браузере: " + e);
         }
     }
 
-
     private static void startDownloadVideo(String subject, String topic, String subtopic) {
         if(videoDownloadSceneDownloadLabelHashMap.get(subtopic).getText().equals("Отменить загрузку")) {
-            Platform.runLater(() -> {
-                videoDownloadSceneCentralLabelHashMap.get(subtopic).setText("Видео не загружено");
-                videoDownloadSceneDownloadLabelHashMap.get(subtopic).setText("Остановка загрузки");
-            });
+            videoDownloadSceneCentralLabelHashMap.get(subtopic).setText("Видео не загружено");
+            videoDownloadSceneDownloadLabelHashMap.get(subtopic).setText("Остановка загрузки");
+
             DBInteraction.threadsForDownload.get(subtopic).interrupt();
             DBInteraction.isVideoDownloading.put(subtopic, null);
 
@@ -193,17 +175,21 @@ public class VideoDownloadController {
                 Platform.runLater(() -> {
                     videoDownloadControllerHashMap.get(subtopic).videoDownloadSceneOfflineModeButton.setVisible(false);
                     videoDownloadControllerHashMap.get(subtopic).videoDownloadSceneOfflineModeButton.setDisable(true);
+
                     videoDownloadSceneCentralLabelHashMap.get(subtopic).setText("Видео загружается");
-                    videoDownloadSceneGifImageViewHashMap.get(subtopic).setVisible(true);
                     videoDownloadSceneDownloadLabelHashMap.get(subtopic).setText("Отменить загрузку");
+                    videoDownloadSceneGifImageViewHashMap.get(subtopic).setVisible(true);
                 });
+
                 DBInteraction.downloadVideo(subject, topic, subtopic);
+
                 if(!Thread.currentThread().isInterrupted() && DBInteraction.isConn) {
                     DBInteraction.isVideoDownloading.put(subtopic, false);
+
                     Platform.runLater(() -> {
                         videoDownloadSceneCentralLabelHashMap.get(subtopic).setText("Видео загружено");
-                        videoDownloadSceneGifImageViewHashMap.get(subtopic).setVisible(false);
                         videoDownloadSceneDownloadLabelHashMap.get(subtopic).setText("Перейти к просмотру");
+                        videoDownloadSceneGifImageViewHashMap.get(subtopic).setVisible(false);
                     });
                 } else {
                     Platform.runLater(() -> {
@@ -222,10 +208,10 @@ public class VideoDownloadController {
             DBInteraction.isVideoDownloading.put(subtopic, true);
             threadForDownloadVideo.start();
         } else if(videoDownloadSceneDownloadLabelHashMap.get(subtopic).getText().equals("Перейти к просмотру")) {
-            currentStage = (Stage)((videoDownloadControllerHashMap.get(subtopic).videoDownloadSceneOfflineModeButton).getScene().getWindow());
+            MainMenuController.currentStage = (Stage)((videoDownloadControllerHashMap.get(subtopic).videoDownloadSceneOfflineModeButton).getScene().getWindow());
             FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
             try {
-                newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
+                newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -235,20 +221,26 @@ public class VideoDownloadController {
             Scene finalNewScene = newScene;
             Platform.runLater(() -> {
                 videoPlayerControllerWhenSwitch.subtopic = subtopic;
+
                 videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
                 videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
                 videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
                 videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+
                 videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
+
                 videoPlayerControllerWhenSwitch.isEducationVideo = true;
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
+
                 videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
-                videoPlayerControllerWhenSwitch.urlOfVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).toURI().toString();
-                videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).getParent());
+
+                File fileWithVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic));
+                videoPlayerControllerWhenSwitch.urlOfVideo = fileWithVideo.toURI().toString();
+                videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory((fileWithVideo).getParent());
                 videoPlayerControllerWhenSwitch.restartPlayer();
             });
-            currentStage.setScene(newScene);
+            MainMenuController.currentStage.setScene(newScene);
         }
     }
 
@@ -270,9 +262,6 @@ public class VideoDownloadController {
         videoDownloadSceneDownloadHBoxHashMap.put(subtopic, videoDownloadSceneDownloadHBox);
         videoDownloadSceneDownloadImageViewHashMap.put(subtopic, videoDownloadSceneDownloadImageView);
         videoDownloadSceneDownloadLabelHashMap.put(subtopic, videoDownloadSceneDownloadLabel);
-        videoDownloadSceneOnlineWatchHBoxHashMap.put(subtopic, videoDownloadSceneOnlineWatchHBox);
-        videoDownloadSceneOnlineWatchImageViewHashMap.put(subtopic, videoDownloadSceneOnlineWatchImageView);
-        videoDownloadSceneOnlineWatchLabelHashMap.put(subtopic, videoDownloadSceneOnlineWatchLabel);
         videoDownloadSceneGifImageViewHashMap.put(subtopic, videoDownloadSceneGifImageView);
 
         videoDownloadSceneRedVBox.getChildren().addAll(videoDownloadSceneNameOfVideoLabel, videoDownloadSceneCentralLabel, videoDownloadSceneDownloadHBox, videoDownloadSceneOnlineWatchHBox, videoDownloadSceneGifImageView);
@@ -300,9 +289,7 @@ public class VideoDownloadController {
         videoDownloadSceneDownloadHBox.maxHeightProperty().bind(videoDownloadSceneDownloadHBox.prefHeightProperty());
         videoDownloadSceneDownloadHBox.setPadding(new Insets(0,5,0,5));
         videoDownloadSceneDownloadHBox.setCursor(Cursor.HAND);
-        videoDownloadSceneDownloadHBox.setOnMousePressed(_ -> {
-            startDownloadVideo(subject, topic, subtopic);
-        });
+        videoDownloadSceneDownloadHBox.setOnMousePressed(_ -> startDownloadVideo(subject, topic, subtopic));
 
         videoDownloadSceneOnlineWatchHBox.getChildren().addAll(videoDownloadSceneOnlineWatchImageView, videoDownloadSceneOnlineWatchLabel);
         videoDownloadSceneOnlineWatchHBox.setAlignment(Pos.CENTER_LEFT);
@@ -313,17 +300,15 @@ public class VideoDownloadController {
         videoDownloadSceneOnlineWatchHBox.prefHeightProperty().bind(videoDownloadSceneDownloadHBox.prefHeightProperty());
         videoDownloadSceneOnlineWatchHBox.setPadding(new Insets(0,5,0,5));
         videoDownloadSceneOnlineWatchHBox.setCursor(Cursor.HAND);
-        videoDownloadSceneOnlineWatchHBox.setOnMousePressed(_ -> {
-            openVideoInBrowser(DBInteraction.videoUrl.get(subtopic));
-        });
+        videoDownloadSceneOnlineWatchHBox.setOnMousePressed(_ -> openVideoInBrowser(DBInteraction.videoUrl.get(subtopic)));
 
         videoDownloadSceneDownloadImageView.setPreserveRatio(true);
-        videoDownloadSceneDownloadImageView.setImage(new Image(VideoDownloadController.class.getResource("/images/download.png").toString()));
+        videoDownloadSceneDownloadImageView.setImage(new Image(Objects.requireNonNull(VideoDownloadController.class.getResource("/images/download.png")).toString()));
 
         videoDownloadSceneOnlineWatchImageView.setPreserveRatio(true);
         videoDownloadSceneOnlineWatchImageView.fitWidthProperty().bind(videoDownloadSceneDownloadImageView.fitWidthProperty());
         videoDownloadSceneOnlineWatchImageView.fitHeightProperty().bind(videoDownloadSceneDownloadImageView.fitHeightProperty());
-        videoDownloadSceneOnlineWatchImageView.setImage(new Image(VideoDownloadController.class.getResource("/images/link.png").toString()));
+        videoDownloadSceneOnlineWatchImageView.setImage(new Image(Objects.requireNonNull(VideoDownloadController.class.getResource("/images/link.png")).toString()));
 
         videoDownloadSceneDownloadLabel.setFont(Font.font("Arial", 14));
         videoDownloadSceneDownloadLabel.setAlignment(Pos.CENTER);
@@ -335,7 +320,7 @@ public class VideoDownloadController {
         videoDownloadSceneOnlineWatchLabel.setText("Посмотреть онлайн");
 
         videoDownloadSceneGifImageView.setPreserveRatio(true);
-        videoDownloadSceneGifImageView.setImage(new Image(VideoDownloadController.class.getResource("/images/loading-bar.gif").toString()));
+        videoDownloadSceneGifImageView.setImage(new Image(Objects.requireNonNull(VideoDownloadController.class.getResource("/images/loading-bar.gif")).toString()));
         videoDownloadSceneGifImageView.setVisible(false);
         videoDownloadSceneGifImageView.setDisable(true);
     }
@@ -544,9 +529,7 @@ public class VideoDownloadController {
         videoDownloadSceneInfoButton.fitWidthProperty().bind(videoDownloadSceneBackButton.heightProperty());
         videoDownloadSceneInfoButton.fitHeightProperty().bind(videoDownloadSceneBackButton.heightProperty());
 
-        videoDownloadSceneBorderPane.heightProperty().addListener(( _, _, newValue) -> {
-            updateSizes(newValue);
-        });
+        videoDownloadSceneBorderPane.heightProperty().addListener(( _, _, newValue) -> updateSizes(newValue));
     }
 
 }

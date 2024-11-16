@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="infoAboutPLayerBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="691.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.player.videoplayer.InfoAboutPlayer">
+   <top>
+      <HBox fx:id="infoAboutPLayerTopHBox" alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="39.0" prefWidth="600.0" style="-fx-background-color: #FF4040;" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="infoAboutPLayerBackButton" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#switchingToTheMainMenu" prefHeight="27.0" prefWidth="132.0" style="-fx-border-color: white; -fx-border-radius: 7px; -fx-border-width: 2px;" text="На главную" textAlignment="JUSTIFY" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="14.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <HBox prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fx:id="infoAboutPLayerImageView" fitHeight="179.0" fitWidth="185.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+               <image>
+                  <Image url="@../../../images/logo-video-player-white-background.png" />
+               </image>
+            </ImageView>
+            <ScrollPane fx:id="infoAboutPLayerScrollPane" hbarPolicy="NEVER" prefHeight="361.0" prefWidth="190.0" style="-fx-background-color: white; -fx-border-width: 0 0 0 2px; -fx-border-color: #FF4040;" styleClass="viewport" stylesheets="@../../../cssStyle/info-about-player-scrollpane.css" HBox.hgrow="ALWAYS">
+               <content>
+                  <VBox fx:id="infoAboutPLayerVBox" alignment="TOP_CENTER" prefHeight="178.0" prefWidth="506.0" spacing="10.0" style="-fx-background-color: white;">
+                     <children>
+                        <Label fx:id="infoAboutPLayerFirstLabel" text="Программное средство 'Видеоплеер'">
+                           <font>
+                              <Font name="Arial Black" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="infoAboutPLayerSecondLabel" alignment="TOP_LEFT" minHeight="-Infinity" text="Программное средство 'Видеоплеер' разработано для просмотра пользователем своих видеороликов, а также обучающих видеуроково по программированию на объектно-ориентированном языке C#." wrapText="true">
+                           <font>
+                              <Font name="Arial Black" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+               </content></ScrollPane>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>
