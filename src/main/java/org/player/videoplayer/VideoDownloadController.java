@@ -78,33 +78,44 @@ public class VideoDownloadController {
     private void switchingToTheVideoSelectionMenu() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
         newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
-        VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
-        VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuFlowPane());
 
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setDisable(false);
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setDisable(false);
+        VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
+        VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.videoSelectionMenuFlowPane);
+
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBox.setDisable(false);
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBox.setDisable(false);
 
         VideoSelectionMenuController.isLeftComboBoxUpdateWhileChangeScene = true;
         VideoSelectionMenuController.isRightComboBoxUpdateWhileChangeScene = true;
 
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().setValue(subject);
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().setValue(topic);
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBox.setValue(subject);
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBox.setValue(topic);
 
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBox().getItems().addAll(VideoSelectionMenuController.leftComboBox);
-        videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBox().getItems().addAll(VideoSelectionMenuController.rightComboBox);
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBox.getItems().addAll(VideoSelectionMenuController.leftComboBox);
+        videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBox.getItems().addAll(VideoSelectionMenuController.rightComboBox);
 
         VideoSelectionMenuController.currentController = videoSelectionMenuControllerWhenSwitch;
         MainMenuController.currentStage.setScene(newScene);
 
         Platform.runLater(() -> {
-            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuLeftComboBoxPromptLabel().setVisible(false);
-            videoSelectionMenuControllerWhenSwitch.getVideoSelectionMenuRightComboBoxPromptLabel().setVisible(false);
+            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBoxPromptLabel.setVisible(false);
+            videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
         });
     }
 
     @FXML
     private void offlineModeActivateDownloadScene(MouseEvent event) throws IOException {
         DBInteraction.isOfflineMode = true;
+        if(DBInteraction.nameOfSubtopics != null) {
+            for(Thread threadForVideoDownload: DBInteraction.threadsForDownload.values()) {
+                threadForVideoDownload.interrupt();
+                try {
+                    threadForVideoDownload.join();
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
         switchingToTheVideoSelectionMenuWhenOfflineModeActivate(event);
     }
 
@@ -216,29 +227,28 @@ public class VideoDownloadController {
                 throw new RuntimeException(e);
             }
             VideoPlayerController videoPlayerControllerWhenSwitch = fxmlLoader.getController();
-            videoPlayerControllerWhenSwitch.setPreviousScene("video-selection-menu-scene.fxml");
-
+            videoPlayerControllerWhenSwitch.subtopic = subtopic;
+            videoPlayerControllerWhenSwitch.previousScene = "video-selection-menu-scene.fxml";
+            videoPlayerControllerWhenSwitch.isEducationVideo = true;
             Scene finalNewScene = newScene;
+
             Platform.runLater(() -> {
-                videoPlayerControllerWhenSwitch.subtopic = subtopic;
 
-                videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
-                videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
-                videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
-                videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+                VideoPlayerController.trackInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".track");
+                VideoPlayerController.trackInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".track");
+                VideoPlayerController.thumbInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".thumb");
+                VideoPlayerController.thumbInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".thumb");
 
-                videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
-
-                videoPlayerControllerWhenSwitch.isEducationVideo = true;
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
-
-                videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
-
+                videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
                 File fileWithVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic));
                 videoPlayerControllerWhenSwitch.urlOfVideo = fileWithVideo.toURI().toString();
                 videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory((fileWithVideo).getParent());
                 videoPlayerControllerWhenSwitch.restartPlayer();
+                videoPlayerControllerWhenSwitch.addListenerForStageFullScreenProperty();
+                videoPlayerControllerWhenSwitch.isFullScreenListenerAdded = true;
+                videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
             });
             MainMenuController.currentStage.setScene(newScene);
         }

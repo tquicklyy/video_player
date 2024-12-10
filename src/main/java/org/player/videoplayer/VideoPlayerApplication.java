@@ -52,15 +52,13 @@ public class VideoPlayerApplication extends Application {
                 }
 
                 if(DBInteraction.nameOfSubtopics != null) {
-                    for(String subtopic: DBInteraction.nameOfSubtopics) {
-                        if (DBInteraction.isVideoDownloading.get(subtopic) != null && DBInteraction.isVideoDownloading.get(subtopic)) {
-                            DBInteraction.threadsForDownload.get(subtopic).interrupt();
+                    for(Thread threadForVideoDownload: DBInteraction.threadsForDownload.values()) {
+                        threadForVideoDownload.interrupt();
                             try {
-                                DBInteraction.threadsForDownload.get(subtopic).join();
+                                threadForVideoDownload.join();
                             } catch (InterruptedException e) {
                                 System.out.println(e.getMessage());
                             }
-                        }
                     }
                 }
 
@@ -76,10 +74,6 @@ public class VideoPlayerApplication extends Application {
                     if(VideoSelectionMenuController.isThreadForCreateVBoxBySubtopicActive) {
                         VideoSelectionMenuController.threadForCreateVBoxBySubtopic.interrupt();
                         VideoSelectionMenuController.threadForCreateVBoxBySubtopic.join();
-                    }
-                    if(VideoSelectionMenuController.isThreadForCreateVBoxByDirectoriesActive) {
-                        VideoSelectionMenuController.threadForCreateVBoxByDirectories.interrupt();
-                        VideoSelectionMenuController.threadForCreateVBoxByDirectories.join();
                     }
                 } catch (Exception e) {
                     System.out.println("Ошибка закрытия приложения: " + e);

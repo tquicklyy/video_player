@@ -56,16 +56,16 @@ public class MainMenuController {
         newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
 
         videoPlayerControllerWhenSwitch = fxmlLoader.getController();
-        videoPlayerControllerWhenSwitch.setPreviousScene("main-menu-scene.fxml");
+        videoPlayerControllerWhenSwitch.previousScene = "main-menu-scene.fxml";
         currentStage.setScene(newScene);
 
         Platform.runLater(() -> {
             videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("На главную");
 
-            videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
-            videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
-            videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
-            videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+            VideoPlayerController.trackInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".track");
+            VideoPlayerController.trackInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".track");
+            VideoPlayerController.thumbInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".thumb");
+            VideoPlayerController.thumbInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".thumb");
 
             videoPlayerControllerWhenSwitch.updateSizes(newScene.getHeight());
             videoPlayerControllerWhenSwitch.openNewVideo();

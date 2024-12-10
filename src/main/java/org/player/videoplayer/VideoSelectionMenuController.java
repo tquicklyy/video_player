@@ -9,7 +9,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
@@ -22,14 +21,15 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 public class VideoSelectionMenuController {
@@ -37,40 +37,20 @@ public class VideoSelectionMenuController {
     @FXML
     private BorderPane videoSelectionMenuBorderPane;
 
-    public FlowPane getVideoSelectionMenuFlowPane() {
-        return videoSelectionMenuFlowPane;
-    }
-
     @FXML
-    private FlowPane videoSelectionMenuFlowPane;
-
-    public ComboBox<String> getVideoSelectionMenuLeftComboBox() {
-        return videoSelectionMenuLeftComboBox;
-    }
+    public FlowPane videoSelectionMenuFlowPane;
 
     @FXML
     private Label videoSelectionMenuLeftLabelUnderComboBox;
 
-    public ComboBox<String> getVideoSelectionMenuRightComboBox() {
-        return videoSelectionMenuRightComboBox;
-    }
+    @FXML
+    public Label videoSelectionMenuLeftComboBoxPromptLabel;
 
     @FXML
-    private Label videoSelectionMenuLeftComboBoxPromptLabel;
-
-    public Label getVideoSelectionMenuLeftComboBoxPromptLabel() {
-        return videoSelectionMenuLeftComboBoxPromptLabel;
-    }
+    public Label videoSelectionMenuRightComboBoxPromptLabel;
 
     @FXML
-    private Label videoSelectionMenuRightComboBoxPromptLabel;
-
-    public Label getVideoSelectionMenuRightComboBoxPromptLabel() {
-        return videoSelectionMenuRightComboBoxPromptLabel;
-    }
-
-    @FXML
-    private ComboBox<String> videoSelectionMenuLeftComboBox;
+    public ComboBox<String> videoSelectionMenuLeftComboBox;
 
     @FXML
     public Label videoSelectionMenuOfflineModeButton;
@@ -97,7 +77,7 @@ public class VideoSelectionMenuController {
     private Label videoSelectionMenuDeleteCenterLabel;
 
     @FXML
-    private ComboBox<String> videoSelectionMenuRightComboBox;
+    public ComboBox<String> videoSelectionMenuRightComboBox;
 
     @FXML
     private Label videoSelectionMenuRightLabelForComboBox;
@@ -123,18 +103,13 @@ public class VideoSelectionMenuController {
     @FXML
     private StackPane videoSelectionMenuStackPane;
 
-    private static Stage currentStage;
-    private static Scene newScene;
-
     public static Thread threadForSynchronize;
     public static Thread threadForDownloadImage;
     public static Thread threadForCreateVBoxBySubtopic;
-    public static Thread threadForCreateVBoxByDirectories;
 
     public static boolean isThreadForSynchronizeActive;
     public static boolean isThreadForDownloadImageActive;
     public static boolean isThreadForCreateVBoxBySubtopicActive;
-    public static boolean isThreadForCreateVBoxByDirectoriesActive;
     public static boolean isLeftComboBoxUpdateWhileChangeScene;
     public static boolean isRightComboBoxUpdateWhileChangeScene;
 
@@ -166,12 +141,11 @@ public class VideoSelectionMenuController {
     private static Alert alertForSomething;
 
     @FXML
-    private void switchingToTheMainMenu(MouseEvent event) throws IOException {
+    private void switchingToTheMainMenu() throws IOException {
         if(threadForSynchronize != null) threadForSynchronize.interrupt();
-        currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("main-menu-scene.fxml"));
-        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-        currentStage.setScene(newScene);
+        Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+        MainMenuController.currentStage.setScene(newScene);
     }
 
     private void openInfo(String textForArea, VideoSelectionMenuController currentController) {
@@ -193,10 +167,13 @@ public class VideoSelectionMenuController {
     @FXML
     private void deleteVideo() {
         if(fileForDelete.delete()) {
-            deleteImageViewHashMap.get(subtopicForDelete).setImage(new Image(getClass().getResource("/images/delete-black.png").toString()));
+            deleteImageViewHashMap.get(subtopicForDelete).setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/delete-black.png")).toString()));
+            deleteImageViewHashMap.get(subtopicForDelete).setCursor(Cursor.DEFAULT);
+
             alertForSomething = new Alert(Alert.AlertType.INFORMATION);
             alertForSomething.setHeaderText("Удаление видео");
             alertForSomething.setContentText("Видео успешно удалено!");
+
             if(VideoDownloadController.videoDownloadControllerHashMap.get(subtopicForDelete) != null) {
                 VideoDownloadController.videoDownloadSceneCentralLabelHashMap.get(subtopicForDelete).setText("Видео не загружено");
                 VideoDownloadController.videoDownloadSceneDownloadLabelHashMap.get(subtopicForDelete).setText("Скачать видео");
@@ -210,99 +187,117 @@ public class VideoSelectionMenuController {
         videoSelectionMenuDeleteVBox.setVisible(false);
         videoSelectionMenuDeleteVBox.setDisable(true);
         videoSelectionMenuBorderPane.setDisable(false);
-        fileForDelete = null;
+    }
+
+    private void openVideoSelectionMenuDeleteVBox() {
+        currentController.videoSelectionMenuDeleteVBox.setDisable(false);
+        currentController.videoSelectionMenuDeleteVBox.setVisible(true);
+        currentController.videoSelectionMenuBorderPane.setDisable(true);
     }
 
     @FXML
     public void offlineModeActivateSelectionScene() {
         DBInteraction.isOfflineMode = true;
+
+        videoSelectionMenuFlowPane.getChildren().clear();
+        videoSelectionMenuRightComboBox.getItems().clear();
+        videoSelectionMenuLeftComboBox.getItems().clear();
+
         videoSelectionMenuLeftComboBox.setDisable(true);
         videoSelectionMenuRightComboBox.setDisable(true);
         videoSelectionMenuOfflineModeButton.setDisable(true);
         videoSelectionMenuLeftComboBoxPromptLabel.setVisible(true);
         videoSelectionMenuRightComboBoxPromptLabel.setVisible(true);
+        videoSelectionMenuUpdate.setDisable(true);
+
         videoSelectionMenuOfflineModeButton.setOpacity(1);
         videoSelectionMenuOfflineModeButton.setCursor(Cursor.DEFAULT);
         videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
+
+        if(DBInteraction.nameOfSubtopics != null) {
+            for(Thread threadForVideoDownload: DBInteraction.threadsForDownload.values()) {
+                threadForVideoDownload.interrupt();
+            }
+        }
+
         if(!videoSelectionMenuFlowPane.getChildren().isEmpty()) {
             videoSelectionMenuFlowPane.getChildren().clear();
         }
+
         videoSelectionMenuLeftComboBox.getItems().clear();
         videoSelectionMenuRightComboBox.getItems().clear();
+
         leftComboBoxFillInOfflineMode();
     }
     
     private void leftComboBoxFillInOfflineMode() {
-        File materailsFile = new File(String.format("../Materials"));
-        if(materailsFile.isDirectory()) {
-            File[] filesInMaterials = materailsFile.listFiles();
-            if(filesInMaterials.length == 0) {
-                alertOn("Темы видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы получить список тем.");
-            } else {
-                videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
-                pauseForDispose = new PauseTransition(Duration.millis(750));
-                pauseForDispose.setOnFinished(_ -> {
-                    videoSelectionMenuUpdate.setDisable(true);
-                    videoSelectionMenuLeftComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBox.setDisable(true);
-                    videoSelectionMenuLeftComboBoxPromptLabel.setVisible(true);
-                    videoSelectionMenuRightComboBoxPromptLabel.setVisible(true);
+        File materailsFile = new File("../Materials");
 
-                    videoSelectionMenuFlowPane.getChildren().clear();
-                    videoSelectionMenuRightComboBox.getItems().clear();
-                    videoSelectionMenuLeftComboBox.getItems().clear();
-                    for (File fileInMaterials :  filesInMaterials) {
-                        videoSelectionMenuLeftComboBox.getItems().add(fileInMaterials.getName());
-                    }
-                    videoSelectionMenuLeftComboBox.setDisable(false);
-                    leftComboBox = videoSelectionMenuLeftComboBox.getItems();
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
-                    videoSelectionMenuUpdate.setDisable(false);
-                });
-                pauseForDispose.play();
-            }
+        File[] filesInMaterials = materailsFile.listFiles();
+        assert filesInMaterials != null;
+
+        if(filesInMaterials.length == 0) {
+            alertOn("Темы видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы получить список тем.");
+        } else {
+            videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
+            pauseForDispose = new PauseTransition(Duration.millis(750));
+
+            pauseForDispose.setOnFinished(_ -> {
+                for (File fileInMaterials :  filesInMaterials) {
+                    videoSelectionMenuLeftComboBox.getItems().add(fileInMaterials.getName());
+                }
+                videoSelectionMenuLeftComboBox.setDisable(false);
+                leftComboBox = videoSelectionMenuLeftComboBox.getItems();
+
+                videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
+                videoSelectionMenuUpdate.setDisable(false);
+            });
+            pauseForDispose.play();
         }
+
     }
 
     private void rightComboBoxFillInOfflineMode() {
         videoSelectionMenuLeftComboBoxPromptLabel.setVisible(false);
         videoSelectionMenuLeftComboBox.setDisable(true);
         videoSelectionMenuRightComboBox.setDisable(true);
+        videoSelectionMenuRightComboBox.setValue(null);
+
         File materailsThemesFile = new File(String.format("../Materials/%s", videoSelectionMenuLeftComboBox.getValue()));
-        if(materailsThemesFile.isDirectory()) {
-            File[] filesInMaterialsTheme = materailsThemesFile.listFiles();
-            if(filesInMaterialsTheme.length == 0) {
-                alertOn("Подтемы видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы получить список подтем.");
-            } else {
-                videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
-                pauseForDispose = new PauseTransition(Duration.millis(750));
-                pauseForDispose.setOnFinished(_ -> {
-                    videoSelectionMenuFlowPane.getChildren().clear();
-                    videoSelectionMenuLeftComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBoxPromptLabel.setVisible(true);
-                    videoSelectionMenuUpdate.setDisable(true);
 
-                    videoSelectionMenuRightComboBox.getItems().clear();
+        File[] filesInMaterialsTheme = materailsThemesFile.listFiles();
+        assert filesInMaterialsTheme != null;
 
-                    for (File fileInMaterialsThemes :  filesInMaterialsTheme) {
-                        videoSelectionMenuRightComboBox.getItems().add(fileInMaterialsThemes.getName());
-                    }
-                    videoSelectionMenuLeftComboBox.setDisable(false);
-                    videoSelectionMenuRightComboBox.setDisable(false);
-                    rightComboBox = videoSelectionMenuRightComboBox.getItems();
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
-                    videoSelectionMenuUpdate.setDisable(false);
-                });
-                pauseForDispose.play();
-            }
+        if(filesInMaterialsTheme.length == 0) {
+            alertOn("Подтемы видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы получить список подтем.");
+        } else {
+            videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
+            videoSelectionMenuUpdate.setDisable(true);
+            videoSelectionMenuFlowPane.getChildren().clear();
+            videoSelectionMenuRightComboBox.getItems().clear();
+            videoSelectionMenuRightComboBoxPromptLabel.setVisible(true);
+
+            pauseForDispose = new PauseTransition(Duration.millis(750));
+            pauseForDispose.setOnFinished(_ -> {
+                for (File fileInMaterialsThemes :  filesInMaterialsTheme) {
+                    videoSelectionMenuRightComboBox.getItems().add(fileInMaterialsThemes.getName());
+                }
+                videoSelectionMenuLeftComboBox.setDisable(false);
+                videoSelectionMenuRightComboBox.setDisable(false);
+
+                rightComboBox = videoSelectionMenuRightComboBox.getItems();
+
+                videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
+                videoSelectionMenuUpdate.setDisable(false);
+            });
+            pauseForDispose.play();
         }
     }
 
     public static void alertOn(String infoHeader, String infoContent) {
         Platform.runLater(() -> {
             alertForSomething = new Alert(Alert.AlertType.ERROR);
-            alertForSomething.initOwner(currentStage);
+            alertForSomething.initOwner(MainMenuController.currentStage);
             alertForSomething.initOwner(MainMenuController.currentStage);
             alertForSomething.setTitle("Ошибка получения данных.");
             alertForSomething.setHeaderText(infoHeader);
@@ -314,11 +309,14 @@ public class VideoSelectionMenuController {
     @FXML
     public void startSynchronize() {
         DBInteraction.isOfflineMode = false;
+
         videoSelectionMenuOfflineModeButton.setText("Включить автономный режим");
         videoSelectionMenuOfflineModeButton.setCursor(Cursor.HAND);
         videoSelectionMenuOfflineModeButton.setVisible(false);
-        videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
+
+        videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
         videoSelectionMenuUpdate.setDisable(true);
+
         videoSelectionMenuLeftComboBox.setDisable(true);
         videoSelectionMenuRightComboBox.setDisable(true);
         videoSelectionMenuLeftComboBoxPromptLabel.setVisible(true);
@@ -327,6 +325,9 @@ public class VideoSelectionMenuController {
         videoSelectionMenuFlowPane.getChildren().clear();
         videoSelectionMenuRightComboBox.getItems().clear();
         videoSelectionMenuLeftComboBox.getItems().clear();
+
+        videoSelectionMenuLeftComboBox.setValue(null);
+        videoSelectionMenuRightComboBox.setValue(null);
 
         pauseForDispose = new PauseTransition(Duration.millis(750));
         pauseForDispose.setOnFinished(_ -> {
@@ -354,29 +355,32 @@ public class VideoSelectionMenuController {
                     });
                 }
                 Platform.runLater(() -> {
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
+                    videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
                     videoSelectionMenuUpdate.setDisable(false);
                 });
                 isThreadForSynchronizeActive = false;
             });
+
             isThreadForSynchronizeActive = true;
             threadForSynchronize.start();
         });
         pauseForDispose.play();
     }
 
-    private void SynchronizeRightComboBox() {
-        videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
+    private void synchronizeRightComboBox() {
+        videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
+        videoSelectionMenuUpdate.setDisable(true);
+
         videoSelectionMenuOfflineModeButton.setDisable(true);
         videoSelectionMenuOfflineModeButton.setVisible(false);
+
         videoSelectionMenuFlowPane.getChildren().clear();
+        videoSelectionMenuRightComboBox.getItems().clear();
+
         videoSelectionMenuLeftComboBox.setDisable(true);
         videoSelectionMenuRightComboBox.setDisable(true);
         videoSelectionMenuRightComboBoxPromptLabel.setVisible(true);
         videoSelectionMenuLeftComboBoxPromptLabel.setVisible(false);
-        videoSelectionMenuUpdate.setDisable(true);
-
-        videoSelectionMenuRightComboBox.getItems().clear();
 
         pauseForDispose = new PauseTransition(Duration.millis(750));
         pauseForDispose.setOnFinished(_ -> {
@@ -396,7 +400,7 @@ public class VideoSelectionMenuController {
                     });
                 }
                 Platform.runLater(() -> {
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
+                    videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
                     videoSelectionMenuUpdate.setDisable(false);
                 });
                 isThreadForSynchronizeActive = false;
@@ -545,10 +549,11 @@ public class VideoSelectionMenuController {
         }
     }
 
-    public void createVBoxInOfflineMode(String subject, String topic) {
+    public void createVBoxBySubtopicInSelectionScene(String subject, String topic) {
         videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
         videoSelectionMenuRightComboBox.setDisable(true);
         videoSelectionMenuLeftComboBox.setDisable(true);
+
         VBox mainVBox;
         VBox secondVBox;
         ImageView imageViewOfVideo;
@@ -568,192 +573,24 @@ public class VideoSelectionMenuController {
         deleteImageViewHashMap = new HashMap<>();
         lastSubjectHashMap = new HashMap<>();
         lastTopicHashMap = new HashMap<>();
-        int i = 0;
 
-        File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
-        File[] subtopicFiles = directoryWithSubtopic.listFiles();
-        if(subtopicFiles.length == 0) {
-            alertOn("Видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы скачать видео.");
-        } else {
-            String subtopic;
-            for(File subtopicFile: subtopicFiles) {
-                subtopic = subtopicFile.getName();
-                mainVBoxHashMap.put(subtopic, new VBox());
-                imageViewHashMap.put(subtopic, new ImageView());
-                secondVBoxHashMap.put(subtopic, new VBox());
-                nameOfVideoLabelHashMap.put(subtopic, new Label());
-                hBoxHashMap.put(subtopic, new HBox());
-                watchLabelHashMap.put(subtopic, new Label());
-                infoImageViewHashMap.put(subtopic, new ImageView());
-                deleteImageViewHashMap.put(subtopic, new ImageView());
+        ArrayList<String> listWithSubtopics = new ArrayList<>();
 
-                mainVBox = mainVBoxHashMap.get(subtopic);
-                secondVBox = secondVBoxHashMap.get(subtopic);
-                imageViewOfVideo = imageViewHashMap.get(subtopic);
-
-                nameOfVideo = nameOfVideoLabelHashMap.get(subtopic);
-                hBoxWithLabels = hBoxHashMap.get(subtopic);
-                watchLabel = watchLabelHashMap.get(subtopic);
-                infoImageView = infoImageViewHashMap.get(subtopic);
-                deleteImageView = deleteImageViewHashMap.get(subtopic);
-
-                mainVBox.getChildren().add(imageViewOfVideo);
-                mainVBox.getChildren().add(secondVBox);
-
-                secondVBox.getChildren().add(nameOfVideo);
-                secondVBox.getChildren().add(hBoxWithLabels);
-
-                hBoxWithLabels.getChildren().add(watchLabel);
-                hBoxWithLabels.getChildren().add(infoImageView);
-                hBoxWithLabels.getChildren().add(deleteImageView);
-
-                mainVBox.setAlignment(Pos.CENTER);
-                mainVBox.getStylesheets().add(getClass().getResource("/cssStyle/video-selection-menu-red-vbox.css").toString());
-                mainVBox.getStyleClass().add("root");
-
-                VBox.setMargin(imageViewOfVideo, new Insets(7));
-                imageViewOfVideo.setPreserveRatio(true);
-
-                secondVBox.setAlignment(Pos.CENTER);
-                secondVBox.setSpacing(10);
-                VBox.setMargin(secondVBox, new Insets(10,0,10,0));
-
-                nameOfVideo.setStyle("-fx-background-color: #FF4040;");
-                nameOfVideo.setAlignment(Pos.CENTER);
-                nameOfVideo.setText(subtopic);
-                nameOfVideo.setTextFill(Color.WHITE);
-
-                VBox.setMargin(hBoxWithLabels , new Insets(0,10,0,10));
-                hBoxWithLabels.setSpacing(10);
-                hBoxWithLabels.setAlignment(Pos.CENTER);
-
-                watchLabel.getStylesheets().add(getClass().getResource("/cssStyle/video-selection-menu-label-for-watch.css").toString());
-                watchLabel.getStyleClass().add("custom-label");
-                watchLabel.setAlignment(Pos.CENTER);
-                watchLabel.setText("Посмотреть");
-                watchLabel.minHeightProperty().bind(watchLabel.prefHeightProperty());
-                watchLabel.maxHeightProperty().bind(watchLabel.prefHeightProperty());
-                watchLabel.minWidthProperty().bind(watchLabel.prefWidthProperty());
-                watchLabel.maxWidthProperty().bind(watchLabel.prefWidthProperty());
-                watchLabel.setCursor(Cursor.HAND);
-
-                String finalSubtopic = subtopic;
-                watchLabel.setOnMousePressed((MouseEvent event) -> {
-                    currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
-                    Scene newScene = null;
-                    FXMLLoader fxmlLoader;
-
-                    lastSubjectHashMap.put(finalSubtopic, videoSelectionMenuLeftComboBox.getValue());
-                    lastTopicHashMap.put(finalSubtopic, videoSelectionMenuRightComboBox.getValue());
-
-                    File videoFile = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, finalSubtopic,finalSubtopic));
-
-                    if(!videoFile.exists()) {
-                        alertOn("Видео не скачано на ПК.", "Отключите автономный режим, чтобы скачать видео.");
-
-                    } else {
-                        fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
-                        try {
-                            newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        videoPlayerControllerWhenSwitch = fxmlLoader.getController();
-                        videoPlayerControllerWhenSwitch.subtopic = finalSubtopic;
-                        videoPlayerControllerWhenSwitch.setPreviousScene("video-selection-menu-scene.fxml");
-                        videoPlayerControllerWhenSwitch.isEducationVideo = true;
-                        Scene finalNewScene = newScene;
-                        Platform.runLater(() -> {
-                            videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
-                            videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
-                            videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
-                            videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
-                            videoPlayerControllerWhenSwitch.isEducationVideo = true;
-                            videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
-                            videoPlayerControllerWhenSwitch.urlOfVideo = videoFile.toURI().toString();
-                            videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, finalSubtopic, finalSubtopic)).getParent());
-                            videoPlayerControllerWhenSwitch.restartPlayer();
-
-                        });
-                        currentStage.setScene(newScene);
-                    }
-
-                });
-
-                infoImageView.setImage(new Image(getClass().getResource("/images/info-red-i.png").toString()));
-                infoImageView.setPreserveRatio(true);
-                infoImageView.setCursor(Cursor.HAND);
-
-                infoImageView.setOnMousePressed((MouseEvent _) -> {
-                    String info = "";
-                    String readLine;
-                    try(BufferedReader reader = new BufferedReader(new FileReader(new File(String.format("../Materials/%s/%s/%s/%s.json",subject,topic,finalSubtopic,finalSubtopic))))) {
-                        while ((readLine = reader.readLine()) != null) {
-                            info += readLine + "\n";
-                        }
-                    } catch (Exception e) {
-                        String index = "";
-                        for(char symbolInNameOfFile: new File(String.format("../Materials/%s/%s/%s",subject,topic,finalSubtopic)).getName().toCharArray()) {
-                            if(Character.isDigit(symbolInNameOfFile)) {
-                                index += symbolInNameOfFile;
-                            } else {
-                                break;
-                            }
-                        }
-                        info = String.format("Глава: %s\nТема: %s\nНомер видео: %s\nНазвание видео: %s\nСсылка на видео в telegram: %s\nСсылка на видео в ВК: %s\nСсылка на бота в telegram: @kubstu_education_bot\nСсылка на группу ВК: https://vk.com/club227646062", subject, topic, index, "Неизвестно", "Неизвестно", "Неизвестно");
-                        System.out.println(e.getMessage());
-                    }
-                    openInfo(info, currentController);
-                });
-
-                File currentFile = new File(String.format("../Materials/%s/%s/%s/%s.mp4",subject, topic, subtopic, subtopic));
-                if (currentFile.exists()) {
-                    deleteImageView.setImage(new Image(getClass().getResource("/images/delete-red.png").toString()));
-                } else {
-                    deleteImageView.setImage(new Image(getClass().getResource("/images/delete-black.png").toString()));
-                }
-                deleteImageView.setPreserveRatio(true);
-                deleteImageView.setCursor(Cursor.HAND);
-                deleteImageView.setOnMousePressed((MouseEvent _) -> {
-                    if(currentFile.exists()) {
-                        currentController.subtopicForDelete = finalSubtopic;
-                        currentController.fileForDelete = currentFile;
-                        currentController.videoSelectionMenuDeleteVBox.setDisable(false);
-                        currentController.videoSelectionMenuDeleteVBox.setVisible(true);
-                        currentController.videoSelectionMenuBorderPane.setDisable(true);
-                    }
-                });
-
-                infoImageView.fitHeightProperty().bind(deleteImageView.fitHeightProperty());
-                infoImageView.fitWidthProperty().bind(deleteImageView.fitWidthProperty());
+        if(DBInteraction.isOfflineMode) {
+            File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
+            File[] subtopicFiles = directoryWithSubtopic.listFiles();
+            assert subtopicFiles != null;
+            if(subtopicFiles.length == 0) {
+                alertOn("Видео отсутствуют на вашем ПК.", "Отключите автономный режим, чтобы скачать видео.");
+                return;
+            } else {
+                for(File subtopicFile: subtopicFiles) listWithSubtopics.add(subtopicFile.getName());
             }
+        } else {
+            listWithSubtopics.addAll(DBInteraction.nameOfSubtopics);
         }
 
-    }
-
-    public void createVBoxBySubtopicInSelectionScene(String subject, String topic) {
-        if(!DBInteraction.isConn) return;
-        VBox mainVBox;
-        VBox secondVBox;
-        ImageView imageViewOfVideo;
-        Label nameOfVideo;
-        HBox hBoxWithLabels;
-        Label watchLabel;
-        ImageView infoImageView;
-        ImageView deleteImageView;
-
-        mainVBoxHashMap = new HashMap<>();
-        imageViewHashMap = new HashMap<>();
-        secondVBoxHashMap = new HashMap<>();
-        nameOfVideoLabelHashMap = new HashMap<>();
-        hBoxHashMap = new HashMap<>();
-        watchLabelHashMap = new HashMap<>();
-        infoImageViewHashMap = new HashMap<>();
-        deleteImageViewHashMap = new HashMap<>();
-        lastSubjectHashMap = new HashMap<>();
-        lastTopicHashMap = new HashMap<>();
-
-        for(String subtopic: DBInteraction.nameOfSubtopics) {
+        for(String subtopic: listWithSubtopics) {
             mainVBoxHashMap.put(subtopic, new VBox());
             imageViewHashMap.put(subtopic, new ImageView());
             secondVBoxHashMap.put(subtopic, new VBox());
@@ -783,7 +620,7 @@ public class VideoSelectionMenuController {
             hBoxWithLabels.getChildren().add(deleteImageView);
 
             mainVBox.setAlignment(Pos.CENTER);
-            mainVBox.getStylesheets().add(getClass().getResource("/cssStyle/video-selection-menu-red-vbox.css").toString());
+            mainVBox.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/cssStyle/video-selection-menu-red-vbox.css")).toString());
             mainVBox.getStyleClass().add("root");
 
             VBox.setMargin(imageViewOfVideo, new Insets(7));
@@ -802,7 +639,7 @@ public class VideoSelectionMenuController {
             hBoxWithLabels.setSpacing(10);
             hBoxWithLabels.setAlignment(Pos.CENTER);
 
-            watchLabel.getStylesheets().add(getClass().getResource("/cssStyle/video-selection-menu-label-for-watch.css").toString());
+            watchLabel.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/cssStyle/video-selection-menu-label-for-watch.css")).toString());
             watchLabel.getStyleClass().add("custom-label");
             watchLabel.setAlignment(Pos.CENTER);
             watchLabel.setText("Посмотреть");
@@ -812,143 +649,204 @@ public class VideoSelectionMenuController {
             watchLabel.maxWidthProperty().bind(watchLabel.prefWidthProperty());
             watchLabel.setCursor(Cursor.HAND);
 
-            watchLabel.setOnMousePressed((MouseEvent event) -> {
-                Stage currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            String pathNameOfJSON = String.format("../Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic);
+            String pathNameOfVideoMP4 = String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic);
+
+            watchLabel.setOnMousePressed((MouseEvent _) -> {
                 Scene newScene = null;
                 FXMLLoader fxmlLoader;
-
                 lastSubjectHashMap.put(subtopic, videoSelectionMenuLeftComboBox.getValue());
                 lastTopicHashMap.put(subtopic, videoSelectionMenuRightComboBox.getValue());
 
-                if(DBInteraction.isVideoDownloading.get(subtopic) != null && DBInteraction.isVideoDownloading.get(subtopic)) {
-                    fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-download-scene.fxml"));
-                    try {
-                        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    VideoDownloadController videoDownloadControllerWhenSwitch = fxmlLoader.getController();
-                    VideoDownloadController.videoDownloadControllerHashMap.put(subtopic, videoDownloadControllerWhenSwitch);
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().clear();
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().add(VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic));
+                if(DBInteraction.isOfflineMode) {
+                    File videoFile = new File(pathNameOfVideoMP4);
 
-                    String info = "";
-                    String readLine;
-                    try(BufferedReader reader = new BufferedReader(new FileReader(new File(String.format("../Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic))))) {
-                        while ((readLine = reader.readLine()) != null) {
-                            info += readLine + "\n";
+                    if(!videoFile.exists()) {
+                        alertOn("Видео не скачано на ПК.", "Отключите автономный режим, чтобы скачать видео.");
+
+                    } else {
+                        fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
+                        try {
+                            newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info);
-
-                    videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
-                    videoDownloadControllerWhenSwitch.subject = subject;
-                    videoDownloadControllerWhenSwitch.topic = topic;
-                    currentStage.setScene(newScene);
-                    Scene finalNewScene1 = newScene;
-                    Platform.runLater(() -> {
-                        videoDownloadControllerWhenSwitch.updateSizes(finalNewScene1.getHeight());
-                    });
-
-                } else if(DBInteraction.isVideoDownloading.get(subtopic) == null && !(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).exists()) || DBInteraction.isVideoDownloading.get(subtopic) != null && !(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).exists())) {
-                    fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-download-scene.fxml"));
-                    try {
-                        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    VideoDownloadController videoDownloadControllerWhenSwitch = fxmlLoader.getController();
-                    if(VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic) == null) {
-                        VideoDownloadController.createVBoxForDownload(subject, topic, subtopic);
-                    }
-                    VideoDownloadController.videoDownloadControllerHashMap.put(subtopic, videoDownloadControllerWhenSwitch);
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().clear();
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().add(VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic));
-
-                    String info = "";
-                    String readLine;
-                    try(BufferedReader reader = new BufferedReader(new FileReader(new File(String.format("../Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic))))) {
-                        while ((readLine = reader.readLine()) != null) {
-                            info += readLine + "\n";
-                        }
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                    videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info);
-
-                    videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
-                    videoDownloadControllerWhenSwitch.subject = subject;
-                    videoDownloadControllerWhenSwitch.topic = topic;
-                    currentStage.setScene(newScene);
-                    Scene finalNewScene1 = newScene;
-                    Platform.runLater(() -> {
-                        videoDownloadControllerWhenSwitch.updateSizes(finalNewScene1.getHeight());
-                    });
-                } else {
-                    fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
-                    try {
-
-                        newScene = new Scene(fxmlLoader.load(), currentStage.getScene().getWidth(), currentStage.getScene().getHeight());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    videoPlayerControllerWhenSwitch = fxmlLoader.getController();
-                    videoPlayerControllerWhenSwitch.subtopic = subtopic;
-                    videoPlayerControllerWhenSwitch.setPreviousScene("video-selection-menu-scene.fxml");
-                    Scene finalNewScene = newScene;
-                    Platform.runLater(() -> {
-                        videoPlayerControllerWhenSwitch.setTrackInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".track"));
-                        videoPlayerControllerWhenSwitch.setTrackInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".track"));
-                        videoPlayerControllerWhenSwitch.setThumbInTimeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneTimeSlider().lookup(".thumb"));
-                        videoPlayerControllerWhenSwitch.setThumbInVolumeSlider(videoPlayerControllerWhenSwitch.getVideoPlayerSceneVolumeSlider().lookup(".thumb"));
+                        videoPlayerControllerWhenSwitch = fxmlLoader.getController();
+                        videoPlayerControllerWhenSwitch.subtopic = subtopic;
+                        videoPlayerControllerWhenSwitch.previousScene = "video-selection-menu-scene.fxml";
                         videoPlayerControllerWhenSwitch.isEducationVideo = true;
-                        videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
-                        videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
-                        videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
-                        videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
-                        videoPlayerControllerWhenSwitch.urlOfVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).toURI().toString();
-                        videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic)).getParent());
-                        videoPlayerControllerWhenSwitch.restartPlayer();
-                    });
-                    currentStage.setScene(newScene);
-                }
+                        Scene finalNewScene = newScene;
 
+                        Platform.runLater(() -> {
+                            VideoPlayerController.trackInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".track");
+                            VideoPlayerController.trackInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".track");
+                            VideoPlayerController.thumbInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".thumb");
+                            VideoPlayerController.thumbInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".thumb");
+
+                            videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
+                            videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
+                            videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
+                            videoPlayerControllerWhenSwitch.urlOfVideo = videoFile.toURI().toString();
+                            videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(pathNameOfVideoMP4).getParent());
+                            videoPlayerControllerWhenSwitch.restartPlayer();
+                            videoPlayerControllerWhenSwitch.addListenerForStageFullScreenProperty();
+                            videoPlayerControllerWhenSwitch.isFullScreenListenerAdded = true;
+                        });
+                        MainMenuController.currentStage.setScene(newScene);
+                    }
+                } else {
+                    if (DBInteraction.isVideoDownloading.get(subtopic) != null && DBInteraction.isVideoDownloading.get(subtopic)) {
+                        fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-download-scene.fxml"));
+                        try {
+                            newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+                        } catch (IOException e) {
+                            System.out.println(e.getMessage());
+                        }
+
+                        VideoDownloadController videoDownloadControllerWhenSwitch = fxmlLoader.getController();
+                        VideoDownloadController.videoDownloadControllerHashMap.put(subtopic, videoDownloadControllerWhenSwitch);
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().clear();
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().add(VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic));
+
+                        StringBuilder info = new StringBuilder();
+                        String readLine;
+
+                        try (BufferedReader reader = new BufferedReader(new FileReader(pathNameOfJSON))) {
+                            while ((readLine = reader.readLine()) != null) {
+                                info.append(readLine).append("\n");
+                            }
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info.toString());
+
+                        videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
+                        videoDownloadControllerWhenSwitch.subject = subject;
+                        videoDownloadControllerWhenSwitch.topic = topic;
+
+                        MainMenuController.currentStage.setScene(newScene);
+                        Scene finalNewScene1 = newScene;
+                        Platform.runLater(() -> {
+                            assert finalNewScene1 != null;
+                            videoDownloadControllerWhenSwitch.updateSizes(finalNewScene1.getHeight());
+                        });
+
+                    } else if (DBInteraction.isVideoDownloading.get(subtopic) == null && !(new File(pathNameOfVideoMP4).exists()) || DBInteraction.isVideoDownloading.get(subtopic) != null && !(new File(pathNameOfVideoMP4).exists())) {
+                        fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-download-scene.fxml"));
+                        try {
+                            newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+                        } catch (IOException e) {
+                            System.out.println("Ошибка " + e.getMessage());
+                        }
+
+                        VideoDownloadController videoDownloadControllerWhenSwitch = fxmlLoader.getController();
+                        if (VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic) == null) {
+                            VideoDownloadController.createVBoxForDownload(subject, topic, subtopic);
+                        }
+
+                        VideoDownloadController.videoDownloadControllerHashMap.put(subtopic, videoDownloadControllerWhenSwitch);
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().clear();
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneCentralVBox.getChildren().add(VideoDownloadController.videoDownloadSceneRedVBoxHashMap.get(subtopic));
+
+                        StringBuilder info = new StringBuilder();
+                        String readLine;
+                        try (BufferedReader reader = new BufferedReader(new FileReader(pathNameOfJSON))) {
+                            while ((readLine = reader.readLine()) != null) {
+                                info.append(readLine).append("\n");
+                            }
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+
+                        videoDownloadControllerWhenSwitch.videoDownloadSceneInfoTextArea.setText(info.toString());
+
+                        videoDownloadControllerWhenSwitch.linkForWatch = DBInteraction.videoUrl.get(subtopic);
+                        videoDownloadControllerWhenSwitch.subject = subject;
+                        videoDownloadControllerWhenSwitch.topic = topic;
+                        MainMenuController.currentStage.setScene(newScene);
+                        Scene finalNewScene1 = newScene;
+                        Platform.runLater(() -> {
+                            assert finalNewScene1 != null;
+                            videoDownloadControllerWhenSwitch.updateSizes(finalNewScene1.getHeight());
+                        });
+                    } else {
+                        fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
+                        try {
+                            newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        videoPlayerControllerWhenSwitch = fxmlLoader.getController();
+                        videoPlayerControllerWhenSwitch.subtopic = subtopic;
+                        videoPlayerControllerWhenSwitch.previousScene = "video-selection-menu-scene.fxml";
+                        Scene finalNewScene = newScene;
+                        Platform.runLater(() -> {
+                            VideoPlayerController.trackInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".track");
+                            VideoPlayerController.trackInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".track");
+                            VideoPlayerController.thumbInTimeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneTimeSlider.lookup(".thumb");
+                            VideoPlayerController.thumbInVolumeSlider = videoPlayerControllerWhenSwitch.videoPlayerSceneVolumeSlider.lookup(".thumb");
+
+                            videoPlayerControllerWhenSwitch.isEducationVideo = true;
+
+                            videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
+                            videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
+
+                            videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
+                            videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
+                            videoPlayerControllerWhenSwitch.urlOfVideo = new File(pathNameOfVideoMP4).toURI().toString();
+                            videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic, subtopic)).getParent());
+                            videoPlayerControllerWhenSwitch.restartPlayer();
+                            videoPlayerControllerWhenSwitch.addListenerForStageFullScreenProperty();
+                            videoPlayerControllerWhenSwitch.isFullScreenListenerAdded = true;
+                        });
+                        MainMenuController.currentStage.setScene(newScene);
+                    }
+                }
             });
 
-            infoImageView.setImage(new Image(getClass().getResource("/images/info-red-i.png").toString()));
+            infoImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/info-red-i.png")).toString()));
             infoImageView.setPreserveRatio(true);
             infoImageView.setCursor(Cursor.HAND);
 
             infoImageView.setOnMousePressed((MouseEvent _) -> {
-                String info = "";
+                StringBuilder info = new StringBuilder();
                 String readLine;
-                try(BufferedReader reader = new BufferedReader(new FileReader(new File(String.format("../Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic))))) {
+                try(BufferedReader reader = new BufferedReader(new FileReader(pathNameOfJSON))) {
                     while ((readLine = reader.readLine()) != null) {
-                        info += readLine + "\n";
+                        info.append(readLine).append("\n");
                     }
                 } catch (Exception e) {
+                    String index = "";
+                    for(char symbolInNameOfFile: new File(String.format("../Materials/%s/%s/%s",subject,topic,subtopic)).getName().toCharArray()) {
+                        if(Character.isDigit(symbolInNameOfFile)) {
+                            index += symbolInNameOfFile;
+                        } else {
+                            break;
+                        }
+                    }
+                    info = new StringBuilder(String.format("Глава: %s\nТема: %s\nНомер видео: %s\nНазвание видео: %s\nСсылка на видео в telegram: %s\nСсылка на видео в ВК: %s\nСсылка на бота в telegram: @kubstu_education_bot\nСсылка на группу ВК: https://vk.com/club227646062", subject, topic, index, "Неизвестно", "Неизвестно", "Неизвестно"));
                     System.out.println(e.getMessage());
                 }
-                openInfo(info, currentController);
+                openInfo(info.toString(), currentController);
             });
 
-            File currentFile = new File(String.format("../Materials/%s/%s/%s/%s.mp4",subject, topic, subtopic, subtopic));
-            if (currentFile.exists()) {
-                deleteImageView.setImage(new Image(getClass().getResource("/images/delete-red.png").toString()));
+            File currentFile = new File(pathNameOfVideoMP4);
+
+            if(currentFile.exists() && (DBInteraction.isVideoDownloading.get(subtopic) == null || !DBInteraction.isVideoDownloading.get(subtopic))) {
+                deleteImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/delete-red.png")).toString()));
+                deleteImageView.setCursor(Cursor.HAND);
             } else {
-                deleteImageView.setImage(new Image(getClass().getResource("/images/delete-black.png").toString()));
+                deleteImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/delete-black.png")).toString()));
+                deleteImageView.setCursor(Cursor.DEFAULT);
             }
             deleteImageView.setPreserveRatio(true);
-            deleteImageView.setCursor(Cursor.HAND);
+
             deleteImageView.setOnMousePressed((MouseEvent _) -> {
-                if(currentFile.exists()) {
+                if(currentFile.exists() && (DBInteraction.isVideoDownloading.get(subtopic) == null || !DBInteraction.isVideoDownloading.get(subtopic))) {
                     currentController.subtopicForDelete = subtopic;
                     currentController.fileForDelete = currentFile;
-                    currentController.videoSelectionMenuDeleteVBox.setDisable(false);
-                    currentController.videoSelectionMenuDeleteVBox.setVisible(true);
-                    currentController.videoSelectionMenuBorderPane.setDisable(true);
+                    openVideoSelectionMenuDeleteVBox();
                 }
             });
 
@@ -967,6 +865,7 @@ public class VideoSelectionMenuController {
         } else {
             File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
             File[] subtopicFiles = directoryWithSubtopic.listFiles();
+            assert subtopicFiles != null;
             for(File subtopicFile: subtopicFiles) {
                 vBox = mainVBoxHashMap.get(subtopicFile.getName());
                 videoSelectionMenuFlowPane.getChildren().add(vBox);
@@ -989,21 +888,127 @@ public class VideoSelectionMenuController {
             File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
             File[] subtopicFiles = directoryWithSubtopic.listFiles();
             File imageForSet;
+            assert subtopicFiles != null;
             for(File subtopicFile: subtopicFiles) {
                 try {
                     imageViewOfVideo = imageViewHashMap.get(subtopicFile.getName());
                     imageForSet = new File((String.format("../Materials/%s/%s/%s/%s.png", subject, topic, subtopicFile.getName(), subtopicFile.getName())));
                     if(imageForSet.exists()) {
-                        System.out.println(1);
                         imageViewOfVideo.setImage(new Image(imageForSet.toURI().toString()));
                     } else {
-                        System.out.println(2);
-                        imageViewOfVideo.setImage(new Image(VideoSelectionMenuController.class.getResource("/images/logo-for-undownload-video.png").toURI().toString()));
+                        imageViewOfVideo.setImage(new Image(Objects.requireNonNull(VideoSelectionMenuController.class.getResource("/images/logo-for-undownload-video.png")).toString()));
                     }
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
             }
+        }
+    }
+
+    public void startPrintVBoxes() {
+        if(!DBInteraction.isOfflineMode) {
+            videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
+            videoSelectionMenuUpdate.setDisable(true);
+
+            videoSelectionMenuOfflineModeButton.setDisable(true);
+            videoSelectionMenuOfflineModeButton.setVisible(false);
+
+            videoSelectionMenuLeftComboBox.setDisable(true);
+            videoSelectionMenuRightComboBox.setDisable(true);
+
+            videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
+            videoSelectionMenuFlowPane.getChildren().clear();
+
+            pauseForDispose = new PauseTransition(Duration.millis(750));
+            pauseForDispose.setOnFinished(_ -> {
+                threadForSynchronize = new Thread(() -> {
+                    DBInteraction.getSubtopics(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                    isThreadForSynchronizeActive = false;
+                });
+                isThreadForSynchronizeActive = true;
+                threadForSynchronize.start();
+
+                threadForCreateVBoxBySubtopic = new Thread(() -> {
+                    try {
+                        threadForSynchronize.join();
+                        threadForDownloadImage.join();
+                        if (DBInteraction.isConn) {
+                            createVBoxBySubtopicInSelectionScene(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                            setImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                            Platform.runLater(() -> {
+                                videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
+                                videoSelectionMenuUpdate.setDisable(false);
+                                videoSelectionMenuLeftComboBox.setDisable(false);
+                                videoSelectionMenuRightComboBox.setDisable(false);
+
+                                displayVBox(videoSelectionMenuFlowPane);
+                                updateSizes(videoSelectionMenuBorderPane.getWidth());
+                            });
+                        } else {
+                            Platform.runLater(() -> {
+                                videoSelectionMenuOfflineModeButton.setDisable(false);
+                                videoSelectionMenuOfflineModeButton.setVisible(true);
+
+                                videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
+                                videoSelectionMenuUpdate.setDisable(false);
+
+                                videoSelectionMenuLeftComboBox.setDisable(false);
+                                videoSelectionMenuRightComboBox.setDisable(false);
+
+                            });
+                        }
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    isThreadForCreateVBoxBySubtopicActive = false;
+                });
+                isThreadForCreateVBoxBySubtopicActive = true;
+                threadForCreateVBoxBySubtopic.start();
+
+                threadForDownloadImage = new Thread(() -> {
+                    try {
+                        threadForSynchronize.join();
+                        if (DBInteraction.isConn) {
+                            DBInteraction.downloadImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                        }
+                        isThreadForDownloadImageActive = false;
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                });
+                isThreadForDownloadImageActive = true;
+                threadForDownloadImage.start();
+
+            });
+            pauseForDispose.play();
+        } else {
+            pauseForDispose = new PauseTransition(Duration.millis(750));
+            videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/loading-circle.gif")).toString()));
+            videoSelectionMenuUpdate.setDisable(true);
+
+            videoSelectionMenuLeftComboBox.setDisable(true);
+            videoSelectionMenuRightComboBox.setDisable(true);
+
+            videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
+            videoSelectionMenuFlowPane.getChildren().clear();
+
+            pauseForDispose.setOnFinished(_ -> {
+                subject = videoSelectionMenuLeftComboBox.getValue();
+                topic = videoSelectionMenuRightComboBox.getValue();
+
+                createVBoxBySubtopicInSelectionScene(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                setImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
+                displayVBox(videoSelectionMenuFlowPane);
+                updateSizes(videoSelectionMenuBorderPane.getWidth());
+
+                videoSelectionMenuLeftComboBox.setDisable(false);
+                videoSelectionMenuRightComboBox.setDisable(false);
+                videoSelectionMenuUpdate.setDisable(false);
+                videoSelectionMenuUpdate.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/update.png")).toString()));
+            });
+            pauseForDispose.play();
+
         }
     }
 
@@ -1049,7 +1054,7 @@ public class VideoSelectionMenuController {
                     return;
                 }
                 if(!DBInteraction.isOfflineMode) {
-                    SynchronizeRightComboBox();
+                    synchronizeRightComboBox();
                 } else {
                     rightComboBoxFillInOfflineMode();
                 }
@@ -1062,99 +1067,7 @@ public class VideoSelectionMenuController {
                     isRightComboBoxUpdateWhileChangeScene = false;
                     return;
                 }
-                if(!DBInteraction.isOfflineMode) {
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
-                    videoSelectionMenuOfflineModeButton.setDisable(true);
-                    videoSelectionMenuOfflineModeButton.setVisible(false);
-                    videoSelectionMenuLeftComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBox.setDisable(true);
-
-                    videoSelectionMenuUpdate.setDisable(true);
-                    videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
-                    videoSelectionMenuFlowPane.getChildren().clear();
-
-                    pauseForDispose = new PauseTransition(Duration.millis(750));
-                    pauseForDispose.setOnFinished(_ -> {
-                        threadForSynchronize = new Thread(() -> {
-                            DBInteraction.getSubtopics(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                            isThreadForSynchronizeActive = false;
-                        });
-                        isThreadForSynchronizeActive = true;
-                        threadForSynchronize.start();
-
-                        threadForCreateVBoxBySubtopic = new Thread(() -> {
-                            try {
-                                threadForSynchronize.join();
-                                threadForDownloadImage.join();
-                                if (DBInteraction.isConn) {
-                                    createVBoxBySubtopicInSelectionScene(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                                    setImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                                    Platform.runLater(() -> {
-                                        videoSelectionMenuUpdate.setDisable(false);
-                                        videoSelectionMenuLeftComboBox.setDisable(false);
-                                        videoSelectionMenuRightComboBox.setDisable(false);
-                                        videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
-                                        displayVBox(videoSelectionMenuFlowPane);
-                                        updateSizes(videoSelectionMenuBorderPane.getWidth());
-                                    });
-                                } else {
-                                    Platform.runLater(() -> {
-                                        videoSelectionMenuOfflineModeButton.setDisable(false);
-                                        videoSelectionMenuOfflineModeButton.setVisible(true);
-                                        videoSelectionMenuUpdate.setDisable(false);
-                                        videoSelectionMenuLeftComboBox.setDisable(false);
-                                        videoSelectionMenuRightComboBox.setDisable(false);
-                                        videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
-                                    });
-                                }
-                            } catch (InterruptedException e) {
-                                System.out.println(e.getMessage());
-                            }
-                            isThreadForCreateVBoxBySubtopicActive = false;
-                        });
-                        isThreadForCreateVBoxBySubtopicActive = true;
-                        threadForCreateVBoxBySubtopic.start();
-
-                        threadForDownloadImage = new Thread(() -> {
-                            try {
-                                threadForSynchronize.join();
-                                if (DBInteraction.isConn) {
-                                    DBInteraction.downloadImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                                }
-                                isThreadForDownloadImageActive = false;
-                            } catch (Exception e) {
-                                System.out.println(e.getMessage());
-                            }
-
-                        });
-                        isThreadForDownloadImageActive = true;
-                        threadForDownloadImage.start();
-
-                    });
-                    pauseForDispose.play();
-                } else {
-                    pauseForDispose = new PauseTransition(Duration.millis(750));
-                    videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/loading-circle.gif").toString()));
-                    videoSelectionMenuUpdate.setDisable(true);
-                    videoSelectionMenuLeftComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBox.setDisable(true);
-                    videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
-                    pauseForDispose.setOnFinished(_ -> {
-                        videoSelectionMenuFlowPane.getChildren().clear();
-                        subject = videoSelectionMenuLeftComboBox.getValue();
-                        topic = videoSelectionMenuRightComboBox.getValue();
-                        createVBoxInOfflineMode(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                        setImages(videoSelectionMenuLeftComboBox.getValue(), videoSelectionMenuRightComboBox.getValue());
-                        displayVBox(videoSelectionMenuFlowPane);
-                        updateSizes(videoSelectionMenuBorderPane.getWidth());
-                        videoSelectionMenuLeftComboBox.setDisable(false);
-                        videoSelectionMenuRightComboBox.setDisable(false);
-                        videoSelectionMenuUpdate.setDisable(false);
-                        videoSelectionMenuUpdate.setImage(new Image(getClass().getResource("/images/update.png").toString()));
-                    });
-                    pauseForDispose.play();
-
-                }
+                startPrintVBoxes();
             }
         });
 

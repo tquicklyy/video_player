@@ -1,6 +1,7 @@
 package org.player.videoplayer;
 
 import javafx.application.Platform;
+import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
@@ -180,11 +181,12 @@ public class DBInteraction {
 
                 download(urlOfVideo, fileToSave);
 
-                if(!Thread.currentThread().isInterrupted()) {
+                if(!Thread.currentThread().isInterrupted() && isConn) {
                     VideoSelectionMenuController.deleteImageViewHashMap.get(subtopic).setImage(new Image(Objects.requireNonNull(DBInteraction.class.getResource("/images/delete-red.png")).toString()));
+                    VideoSelectionMenuController.deleteImageViewHashMap.get(subtopic).setCursor(Cursor.HAND);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Ошибка скачивания видео: " + e);
             }
 
     }
@@ -193,6 +195,7 @@ public class DBInteraction {
         URL urlOfImage;
         File directoryToSave;
         File fileToSave;
+        File oldFile;
 
         for(String subtopic: nameOfSubtopics) {
             directoryToSave = new File(String.format("../Materials/%s/%s/%s", subject, topic, subtopic));
@@ -201,10 +204,13 @@ public class DBInteraction {
 
             try {
                 urlOfImage = new URI(imageUrl.get(subtopic)).toURL();
-                fileToSave = new File(String.format("%s/%s.png", directoryToSave, subtopic));
-                if(!fileToSave.exists()) {
-                    if(isConn) {
-                        download(urlOfImage, fileToSave);
+                fileToSave = new File(String.format("%s/%snew.png", directoryToSave, subtopic));
+                if(isConn) {
+                    download(urlOfImage, fileToSave);
+                    if (!Thread.currentThread().isInterrupted() || isConn) {
+                        oldFile = new File(String.format("%s/%s.png", directoryToSave, subtopic));
+                        oldFile.delete();
+                        fileToSave.renameTo(oldFile);
                     }
                 }
             } catch (Exception e) {

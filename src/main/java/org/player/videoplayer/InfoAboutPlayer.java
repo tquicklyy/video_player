@@ -39,12 +39,10 @@ public class InfoAboutPlayer {
     @FXML
     private ScrollPane infoAboutPLayerScrollPane;
 
-    private Scene newScene;
-
     @FXML
     void switchingToTheMainMenu() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("main-menu-scene.fxml"));
-        newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+        Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
         MainMenuController.currentStage.setScene(newScene);
     }
 
@@ -103,9 +101,7 @@ public class InfoAboutPlayer {
             }
         });
 
-        infoAboutPLayerBorderPane.widthProperty().addListener((_, _, newValue) -> {
-            updateSizes(newValue);
-        });
+        infoAboutPLayerBorderPane.widthProperty().addListener((_, _, newValue) -> updateSizes(newValue));
 
         infoAboutPLayerScrollPane.prefHeightProperty().bind(infoAboutPLayerBorderPane.heightProperty().subtract(infoAboutPLayerTopHBox.heightProperty()));
         infoAboutPLayerScrollPane.prefWidthProperty().bind(infoAboutPLayerBorderPane.widthProperty().subtract(infoAboutPLayerImageView.fitWidthProperty()));
@@ -114,22 +110,29 @@ public class InfoAboutPlayer {
 
         infoAboutPLayerSecondLabel.fontProperty().bind(infoAboutPLayerFirstLabel.fontProperty());
 
-        infoAboutPLayerSecondLabel.setText("Версия программы: v1.6.\n\n" +
-                "Разработали: Конников Глеб Владимирович, Хагажеев Марат Муритович, Ковтун Владимир Александрович.\n\n" +
-                "Дата выпуска: 13 ноября 2024г.\n\n" +
-                "Программное средство 'Видеоплеер' разработано для просмотра пользователем" +
-                " своих видеороликов, а также обучающих видеуроков по программированию" +
-                " на объектно-ориентированном языке C#.\n\nВ разработанном ПО доступны следующие функции:\n\n" +
-                "– просмотр собственных видео;\n" +
-                "– просмотр информации о ПО;\n" +
-                "– просмотр тем видео по программированию;\n" +
-                "– просмотр подтем видео по программированию;\n" +
-                "– просмотр списка видео по программированию;\n" +
-                "– скачивание видео по программированию;\n" +
-                "– удаление видео по программированию;\n" +
-                "– просмотр информации о видео;\n" +
-                "– просмотр видео по программироавнию онлайн;\n" +
-                "– просмотр видео по программированию локально.");
+        infoAboutPLayerSecondLabel.setText("""
+                Версия программы: v1.6.
+
+                Разработали: Конников Глеб Владимирович, Хагажеев Марат Муритович, Ковтун Владимир Александрович.
+
+                Дата выпуска: 13 ноября 2024г.
+
+                Программное средство 'Видеоплеер' разработано для просмотра пользователем\
+                 своих видеороликов, а также обучающих видеуроков по программированию\
+                 на объектно-ориентированном языке C#.
+
+                В разработанном ПО доступны следующие функции:
+
+                – просмотр собственных видео;
+                – просмотр информации о ПО;
+                – просмотр тем видео по программированию;
+                – просмотр подтем видео по программированию;
+                – просмотр списка видео по программированию;
+                – скачивание видео по программированию;
+                – удаление видео по программированию;
+                – просмотр информации о видео;
+                – просмотр видео по программироавнию онлайн;
+                – просмотр видео по программированию локально.""");
 
     }
 
