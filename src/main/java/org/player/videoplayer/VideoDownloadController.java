@@ -120,6 +120,7 @@ public class VideoDownloadController {
     }
 
     private void switchingToTheVideoSelectionMenuWhenOfflineModeActivate(MouseEvent event) throws IOException {
+        VideoPlayerController.isEducationVideo = false;
         MainMenuController.currentStage = (Stage)((Node)event.getSource()).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-selection-menu-scene.fxml"));
         newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
@@ -219,6 +220,7 @@ public class VideoDownloadController {
             DBInteraction.isVideoDownloading.put(subtopic, true);
             threadForDownloadVideo.start();
         } else if(videoDownloadSceneDownloadLabelHashMap.get(subtopic).getText().equals("Перейти к просмотру")) {
+            VideoPlayerController.isEducationVideo = true;
             MainMenuController.currentStage = (Stage)((videoDownloadControllerHashMap.get(subtopic).videoDownloadSceneOfflineModeButton).getScene().getWindow());
             FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource("video-player-scene.fxml"));
             try {
@@ -229,7 +231,6 @@ public class VideoDownloadController {
             VideoPlayerController videoPlayerControllerWhenSwitch = fxmlLoader.getController();
             videoPlayerControllerWhenSwitch.subtopic = subtopic;
             videoPlayerControllerWhenSwitch.previousScene = "video-selection-menu-scene.fxml";
-            videoPlayerControllerWhenSwitch.isEducationVideo = true;
             Scene finalNewScene = newScene;
 
             Platform.runLater(() -> {

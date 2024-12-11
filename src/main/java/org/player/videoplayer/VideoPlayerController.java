@@ -129,7 +129,6 @@ public class VideoPlayerController {
     private static double videoPlayerSceneVolumeImageViewWidthBeforeWrap;
 
     private Font videoPlayerSceneCurrentTimeLabelFontBeforeWrap;
-    private static Font videoPlayerSceneVolumeLabelFontBeforeWrap;
 
     public static Node trackInTimeSlider;
     public static Node trackInVolumeSlider;
@@ -141,18 +140,26 @@ public class VideoPlayerController {
     private Timer timerForFullScreenWhenUserMovedMouse = new Timer();
     private PauseTransition pauseForDispose;
 
-    public boolean isEducationVideo;
+    public static boolean isEducationVideo;
 
     public String subtopic;
 
     @FXML
     private void switchingToTheBackScene() throws IOException {
         isBackButton = true;
+        isEducationVideo = false;
 
-        if(mediaPlayerOfVideo != null) {
-            mediaPlayerOfVideo.dispose();
+        Platform.runLater(() -> {
+            videoPlayerSceneMediaView.setMediaPlayer(null);
             mediaOfVideo = null;
-        }
+            attemptsDownloadVideoIfError = 0;
+            if(mediaPlayerOfVideo != null) {
+                mediaPlayerOfVideo.stop();
+                mediaPlayerOfVideo.dispose();
+                mediaPlayerOfVideo = null;
+            }
+            System.gc();
+        });
 
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
         Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
@@ -213,14 +220,23 @@ public class VideoPlayerController {
             isSeekingTime = true;
             double newTimeSeconds = videoPlayerSceneTimeSlider.getValue();
 
-            mediaPlayerOfVideo.seek(Duration.seconds(newTimeSeconds));
+            Platform.runLater(() -> {
+                mediaPlayerOfVideo.seek(Duration.seconds(newTimeSeconds));
+                mediaPlayerOfVideo.pause();
+                mediaPlayerOfVideo.play();
 
-            if(newTimeSeconds >= totalDurationOfVideo.toSeconds()) {
-                videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/play-button.png")).toString()));
-                isVideoPlayed = false;
-                mediaPlayerOfVideo.stop();
-            }
-            isSeekingTime = false;
+                if(newTimeSeconds >= totalDurationOfVideo.toSeconds()) {
+                    videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/play-button.png")).toString()));
+                    isVideoPlayed = false;
+                    Platform.runLater(() -> {
+                        mediaPlayerOfVideo.pause();
+                        videoPlayerSceneTimeSlider.setValue(0);
+                    });
+                    mediaPlayerOfVideo.seek(Duration.seconds(0));
+                }
+                isSeekingTime = false;
+            });
+
         }
     }
 
@@ -280,10 +296,15 @@ public class VideoPlayerController {
             double newTimeSeconds = videoPlayerSceneTimeSlider.getValue() + 10;
 
             mediaPlayerOfVideo.seek(Duration.seconds(newTimeSeconds));
+
             if(newTimeSeconds >= totalDurationOfVideo.toSeconds()) {
                 videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/play-button.png")).toString()));
                 isVideoPlayed = false;
-                mediaPlayerOfVideo.stop();
+                Platform.runLater(() -> {
+                    mediaPlayerOfVideo.pause();
+                    videoPlayerSceneTimeSlider.setValue(0);
+                });
+                mediaPlayerOfVideo.seek(Duration.seconds(0));
             }
 
             isSeekingTime = false;
@@ -340,7 +361,7 @@ public class VideoPlayerController {
                 for (File file : Objects.requireNonNull(generalDirectory.listFiles())) {
                     for(File fileInside: Objects.requireNonNull(file.listFiles())) {
                         if (isFileVideo(fileInside)) {
-                            if (file.toURI().toString().equals(urlOfVideo)) {
+                            if (fileInside.toURI().toString().equals(urlOfVideo)) {
                                 currentKeyOfVideoForDictionary = key;
                             }
                             dictionaryOfPathToVideosInCurrentDirectory.put(key, fileInside.toURI().toString());
@@ -415,19 +436,47 @@ public class VideoPlayerController {
         }
     }
 
-    public void restartPlayer() {
-        if(mediaPlayerOfVideo != null) {
-            mediaPlayerOfVideo.dispose();
-            mediaOfVideo = null;
+    private void alertOn() {
+        Alert alertWithVideo = new Alert(Alert.AlertType.ERROR);
+        alertWithVideo.setTitle("Ошибка открытия видео");
+        alertWithVideo.setHeaderText("Не удалось открыть выбранный видеоролик после нескольких попыток.");
+        alertWithVideo.setContentText("""
+                    Обратите внимание, что видеоплеер поддерживает видеоролики в формате MP4 с кодеком H.264.
+                    Если выбранное видео является обучающим, возможно оно находится на этапе загрузки.
+                    Вы будуте автоматически возвращены в прошлое окно.""");
+        alertWithVideo.getDialogPane().setMinWidth(400);
+        alertWithVideo.getDialogPane().setMinHeight(250);
+        alertWithVideo.initOwner(MainMenuController.currentStage);
+        alertWithVideo.showAndWait();
+        try {
+            Platform.runLater(() -> {
+                videoPlayerSceneMediaView.setMediaPlayer(null);
+                mediaOfVideo = null;
+                attemptsDownloadVideoIfError = 0;
+                if(mediaPlayerOfVideo != null) {
+                    mediaPlayerOfVideo.stop();
+                    mediaPlayerOfVideo.dispose();
+                    mediaPlayerOfVideo = null;
+                }
+                System.gc();
+            });
+            switchingToTheBackScene();
+        } catch (Exception e) {
+            System.out.println("Ошибка : " + e.getMessage());
         }
+    }
+
+    public void restartPlayer() {
+        videoPlayerSceneMediaView.setMediaPlayer(null);
+        mediaOfVideo = null;
+        if(mediaPlayerOfVideo != null) {
+            mediaPlayerOfVideo.stop();
+            mediaPlayerOfVideo.dispose();
+            mediaPlayerOfVideo = null;
+        }
+        System.gc();
         if(attemptsDownloadVideoIfError == MAX_ATTEMPTS_DOWNLOAD_VIDEO_IF_ERROR) {
-            Alert alertWithVideo = new Alert(Alert.AlertType.ERROR);
-            alertWithVideo.setTitle("Ошибка открытия видео");
-            alertWithVideo.setHeaderText("Не удалось открыть выбранный видеоролик после нескольких попыток.");
-            alertWithVideo.setContentText("Пожалуйста, попробуйте ещё раз. Обратите внимание, что " +
-                    "видеоплеер поддерживает видеоролики в формате MP4 с кодеком H.264.");
-            alertWithVideo.showAndWait();
-            return;
+            alertOn();
         }
         isPauseForDisposeNow = true;
         if(isBackButton) {
@@ -438,70 +487,119 @@ public class VideoPlayerController {
     }
 
     private void setupVideo() {
-        mediaOfVideo = new Media(urlOfVideo);
-        mediaPlayerOfVideo = new MediaPlayer(mediaOfVideo);
+        try {
+            videoPlayerSceneCurrentTimeLabel.setText("00:00");
+            mediaOfVideo = new Media(urlOfVideo);
+            mediaPlayerOfVideo = new MediaPlayer(mediaOfVideo);
 
-        mediaPlayerOfVideo.setOnError(() -> {
-            System.err.println("Ошибка медиаплеера: " + mediaPlayerOfVideo.getError().getMessage());
-            attemptsDownloadVideoIfError++;
-            restartPlayer();
-        });
-
-        mediaPlayerOfVideo.setOnReady(() -> {
             totalDurationOfVideo = mediaOfVideo.getDuration();
             isVideoHasHours = totalDurationOfVideo.toHours() >= 1;
-            videoPlayerSceneTimeSlider.setMax(totalDurationOfVideo.toSeconds());
 
-            if(isVideoHasHours) {
-                videoPlayerSceneFullTimeLabel.setText(String.format("%02d:%02d:%02d",(int) totalDurationOfVideo.toHours(), (int) totalDurationOfVideo.toMinutes() % 60, (int) totalDurationOfVideo.toSeconds() % 60));
-            } else {
-                videoPlayerSceneFullTimeLabel.setText(String.format("%02d:%02d", (int) totalDurationOfVideo.toMinutes(), (int) totalDurationOfVideo.toSeconds() % 60));
+            if(isFullScreen) {
+                resetTimerForMainMenuStageDragging();
+                wrapInterfaceWhenFullScreen();
             }
+            else updateSizes(videoPlayerSceneBorderPane.getHeight());
 
             videoPlayerSceneTimeSlider.setValue(0);
             mediaPlayerOfVideo.setVolume(0.5);
             videoPlayerSceneVolumeSlider.setValue(50);
             videoPlayerSceneVolumeLabel.setText("50");
-
-            mediaPlayerOfVideo.currentTimeProperty().addListener((_, _, newValue) -> {
-                videoPlayerSceneTimeSlider.setValue(newValue.toSeconds());
-                if(!isSeekingTime) {
-                    if(isVideoHasHours) {
-                        videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d:%02d",(int) newValue.toHours(), (int) newValue.toMinutes() % 60, (int) newValue.toSeconds() % 60));
-                    } else {
-                        videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d", (int) newValue.toMinutes(), (int) newValue.toSeconds() % 60));
-                    }
-                }
-            });
-
-            mediaPlayerOfVideo.setOnEndOfMedia(() -> {
-                videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/play-button.png")).toString()));
-                isVideoPlayed = false;
-                mediaPlayerOfVideo.stop();
-            });
-
             isVolumeOff = false;
-            videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/stop-button.png")).toString()));
 
-            isVideoPlayed = true;
-            pauseForDispose = new PauseTransition(Duration.millis(2000));
-            pauseForDispose.setOnFinished(_ -> {
-                videoPlayerSceneMediaView.setMediaPlayer(mediaPlayerOfVideo);
-                mediaPlayerOfVideo.play();
-                isPauseForDisposeNow = false;
-                videoPlayerSceneAnotherVideoButton.setDisable(false);
-                videoPlayerSceneSynchronizeImageView.setVisible(false);
-
-                if(isBackButton) {
-                    if(mediaPlayerOfVideo != null) {
-                        mediaPlayerOfVideo.dispose();
-                        mediaOfVideo = null;
-                    }
-                    isBackButton = false;
+            mediaPlayerOfVideo.setOnError(() -> {
+                System.err.println("Ошибка медиаплеера: " + mediaPlayerOfVideo.getError().getMessage());
+                attemptsDownloadVideoIfError++;
+                videoPlayerSceneMediaView.setMediaPlayer(null);
+                mediaOfVideo = null;
+                if(mediaPlayerOfVideo != null) {
+                    mediaPlayerOfVideo.stop();
+                    mediaPlayerOfVideo.dispose();
+                    mediaPlayerOfVideo = null;
                 }
+                System.gc();
+                restartPlayer();
             });
-            pauseForDispose.play();
-        });
+
+            mediaPlayerOfVideo.setOnReady(() -> {
+                totalDurationOfVideo = mediaOfVideo.getDuration();
+                isVideoHasHours = totalDurationOfVideo.toHours() >= 1;
+                videoPlayerSceneTimeSlider.setMax(totalDurationOfVideo.toSeconds());
+
+                if(isVideoHasHours) {
+                    updateSizes(videoPlayerSceneBorderPane.getHeight());
+                    videoPlayerSceneFullTimeLabel.setText(String.format("%02d:%02d:%02d",(int) totalDurationOfVideo.toHours(), (int) totalDurationOfVideo.toMinutes() % 60, (int) totalDurationOfVideo.toSeconds() % 60));
+                    videoPlayerSceneCurrentTimeLabel.setText("00:00:00");
+                } else {
+                    videoPlayerSceneFullTimeLabel.setText(String.format("%02d:%02d", (int) totalDurationOfVideo.toMinutes(), (int) totalDurationOfVideo.toSeconds() % 60));
+                }
+
+                mediaPlayerOfVideo.currentTimeProperty().addListener((_, _, newValue) -> {
+                    if(!isSeekingTime) {
+                        videoPlayerSceneTimeSlider.setValue(newValue.toSeconds());
+                        if(isVideoHasHours) {
+                            videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d:%02d",(int) newValue.toHours(), (int) newValue.toMinutes() % 60, (int) newValue.toSeconds() % 60));
+                        } else {
+                            videoPlayerSceneCurrentTimeLabel.setText(String.format("%02d:%02d", (int) newValue.toMinutes(), (int) newValue.toSeconds() % 60));
+                        }
+                    }
+                });
+
+                mediaPlayerOfVideo.setOnEndOfMedia(() -> {
+                    videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/play-button.png")).toString()));
+                    isVideoPlayed = false;
+                    mediaPlayerOfVideo.seek(Duration.seconds(0));
+                    Platform.runLater(() -> {
+                        mediaPlayerOfVideo.pause();
+                        videoPlayerSceneTimeSlider.setValue(0);
+                    });
+                });
+
+                videoPlayerSceneStopPlayImageView.setImage(new Image(Objects.requireNonNull(getClass().getResource("/images/stop-button.png")).toString()));
+
+                isVideoPlayed = true;
+                timerForFullScreenWhenUserMovedMouse.cancel();
+                pauseForDispose = new PauseTransition(Duration.millis(3000));
+                pauseForDispose.setOnFinished(_ -> {
+                    videoPlayerSceneMediaView.setMediaPlayer(mediaPlayerOfVideo);
+                    isPauseForDisposeNow = false;
+                    videoPlayerSceneAnotherVideoButton.setDisable(false);
+                    videoPlayerSceneSynchronizeImageView.setVisible(false);
+
+                    if(isBackButton) {
+                        videoPlayerSceneMediaView.setMediaPlayer(null);
+                        mediaOfVideo = null;
+                        attemptsDownloadVideoIfError = 0;
+                        if(mediaPlayerOfVideo != null) {
+                            mediaPlayerOfVideo.stop();
+                            mediaPlayerOfVideo.dispose();
+                            mediaPlayerOfVideo = null;
+                        }
+                        System.gc();
+                        isBackButton = false;
+                    }
+
+                    if(isFullScreen) {
+                        resetTimerForMainMenuStageDragging();
+                        wrapInterfaceWhenFullScreen();
+                    }
+                    else updateSizes(videoPlayerSceneBorderPane.getHeight());
+
+                    videoPlayerSceneTimeSlider.setValue(0);
+                    if(mediaPlayerOfVideo != null) mediaPlayerOfVideo.setVolume(0.5);
+                    videoPlayerSceneVolumeSlider.setValue(50);
+                    videoPlayerSceneVolumeLabel.setText("50");
+                    isVolumeOff = false;
+
+                    if(mediaPlayerOfVideo != null) mediaPlayerOfVideo.play();
+                });
+
+                pauseForDispose.play();
+            });
+        } catch (Exception e) {
+            alertOn();
+        }
+
     }
 
     @FXML
@@ -536,7 +634,6 @@ public class VideoPlayerController {
             videoPlayerSceneVolumeImageViewWidthBeforeWrap = videoPlayerSceneVolumeImageView.getFitWidth();
 
             videoPlayerSceneCurrentTimeLabelFontBeforeWrap = videoPlayerSceneCurrentTimeLabel.getFont();
-            videoPlayerSceneVolumeLabelFontBeforeWrap = videoPlayerSceneVolumeLabel.getFont();
 
             videoPlayerSceneTopHBox.setVisible(false);
             videoPlayerSceneTopHBox.setDisable(true);
@@ -594,7 +691,6 @@ public class VideoPlayerController {
         videoPlayerSceneVolumeImageView.setFitWidth(videoPlayerSceneVolumeImageViewWidthBeforeWrap);
 
         videoPlayerSceneCurrentTimeLabel.setFont(videoPlayerSceneCurrentTimeLabelFontBeforeWrap);
-        videoPlayerSceneVolumeLabel.setFont(videoPlayerSceneVolumeLabelFontBeforeWrap);
 
         videoPlayerSceneBotVBox.setVisible(true);
         videoPlayerSceneBotVBox.setDisable(false);
@@ -778,8 +874,8 @@ public class VideoPlayerController {
         videoPlayerSceneVolumeSlider.setValue(0);
         videoPlayerSceneTimeSlider.setValue(0);
 
-        videoPlayerSceneSynchronizeImageView.fitHeightProperty().bind(videoPlayerSceneAnotherVideoButton.heightProperty());
-        videoPlayerSceneSynchronizeImageView.fitWidthProperty().bind(videoPlayerSceneAnotherVideoButton.widthProperty());
+        videoPlayerSceneSynchronizeImageView.fitHeightProperty().bind(videoPlayerSceneBackButton.heightProperty());
+        videoPlayerSceneSynchronizeImageView.fitWidthProperty().bind(videoPlayerSceneSynchronizeImageView.fitHeightProperty());
 
         videoPlayerSceneMediaView.fitWidthProperty().bind(videoPlayerSceneBorderPane.widthProperty());
         videoPlayerSceneMediaView.fitHeightProperty().bind(videoPlayerSceneBorderPane.heightProperty().subtract(videoPlayerSceneTopHBox.heightProperty()).subtract(videoPlayerSceneBotVBox.heightProperty()).subtract(10));
@@ -790,10 +886,15 @@ public class VideoPlayerController {
         videoPlayerSceneVolumeLabel.prefWidthProperty().bind(videoPlayerSceneCurrentTimeLabel.prefWidthProperty());
         videoPlayerSceneVolumeLabel.fontProperty().bind(videoPlayerSceneCurrentTimeLabel.fontProperty());
 
-        videoPlayerSceneAnotherVideoButton.prefWidthProperty().bind(videoPlayerSceneBackButton.prefWidthProperty());
-        videoPlayerSceneAnotherVideoButton.prefHeightProperty().bind(videoPlayerSceneBackButton.prefHeightProperty());
-        videoPlayerSceneAnotherVideoButton.fontProperty().bind(videoPlayerSceneBackButton.fontProperty());
-
+        if(!isEducationVideo) {
+            videoPlayerSceneAnotherVideoButton.prefWidthProperty().bind(videoPlayerSceneBackButton.prefWidthProperty());
+            videoPlayerSceneAnotherVideoButton.prefHeightProperty().bind(videoPlayerSceneBackButton.prefHeightProperty());
+            videoPlayerSceneAnotherVideoButton.fontProperty().bind(videoPlayerSceneBackButton.fontProperty());
+        } else {
+            videoPlayerSceneAnotherVideoButton.setPrefWidth(0);
+            videoPlayerSceneAnotherVideoButton.setPrefHeight(0);
+            videoPlayerSceneAnotherVideoButton.setFont(new Font(1));
+        }
         videoPlayerScenePreviousVideoImageView.fitWidthProperty().bind(videoPlayerSceneVolumeImageView.fitWidthProperty());
         videoPlayerScenePreviousVideoImageView.fitHeightProperty().bind(videoPlayerSceneVolumeImageView.fitHeightProperty());
 

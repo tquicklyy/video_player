@@ -207,10 +207,10 @@ public class DBInteraction {
                 fileToSave = new File(String.format("%s/%snew.png", directoryToSave, subtopic));
                 if(isConn) {
                     download(urlOfImage, fileToSave);
-                    if (!Thread.currentThread().isInterrupted() || isConn) {
+                    if (!Thread.currentThread().isInterrupted() && isConn) {
                         oldFile = new File(String.format("%s/%s.png", directoryToSave, subtopic));
-                        oldFile.delete();
-                        fileToSave.renameTo(oldFile);
+                        if(oldFile.delete()) System.out.println("Старая фотография была удалена.");
+                        if(fileToSave.renameTo(oldFile)) System.out.println("Новая фотография была добавлена.");
                     }
                 }
             } catch (Exception e) {
