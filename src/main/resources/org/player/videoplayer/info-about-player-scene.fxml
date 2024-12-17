@@ -41,12 +41,12 @@
                <content>
                   <VBox fx:id="infoAboutPLayerVBox" alignment="TOP_CENTER" prefHeight="178.0" prefWidth="506.0" spacing="10.0" style="-fx-background-color: white;">
                      <children>
-                        <Label fx:id="infoAboutPLayerFirstLabel" text="Программное средство 'Видеоплеер'">
+                        <Label fx:id="infoAboutPLayerFirstLabel" text="Программное средство 'KubSTU Education Video Player'">
                            <font>
                               <Font name="Arial Black" size="12.0" />
                            </font>
                         </Label>
-                        <Label fx:id="infoAboutPLayerSecondLabel" alignment="TOP_LEFT" minHeight="-Infinity" text="Программное средство 'Видеоплеер' разработано для просмотра пользователем своих видеороликов, а также обучающих видеуроково по программированию на объектно-ориентированном языке C#." wrapText="true">
+                        <Label fx:id="infoAboutPLayerSecondLabel" alignment="TOP_LEFT" minHeight="-Infinity" text="Программное средство 'KubSTU Education Video Player' разработано для просмотра пользователем своих видеороликов, а также обучающих видеоуроков по программированию на объектно-ориентированном языке C#." wrapText="true">
                            <font>
                               <Font name="Arial Black" size="12.0" />
                            </font>

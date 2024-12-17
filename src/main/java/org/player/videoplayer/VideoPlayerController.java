@@ -149,7 +149,9 @@ public class VideoPlayerController {
         isBackButton = true;
         isEducationVideo = false;
 
-        Platform.runLater(() -> {
+        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
+        Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
+        if(previousScene.equals("video-selection-menu-scene.fxml")) {
             videoPlayerSceneMediaView.setMediaPlayer(null);
             mediaOfVideo = null;
             attemptsDownloadVideoIfError = 0;
@@ -159,20 +161,9 @@ public class VideoPlayerController {
                 mediaPlayerOfVideo = null;
             }
             System.gc();
-        });
 
-        FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
-        Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
-        if(previousScene.equals("video-selection-menu-scene.fxml")) {
             VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
             VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.videoSelectionMenuFlowPane);
-
-            if(DBInteraction.isOfflineMode) {
-                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setVisible(true);
-                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setDisable(true);
-                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setOpacity(1);
-                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
-            }
 
             videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBox.setDisable(false);
             videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBox.setDisable(false);
@@ -190,6 +181,13 @@ public class VideoPlayerController {
 
             videoSelectionMenuControllerWhenSwitch.videoSelectionMenuLeftComboBoxPromptLabel.setVisible(false);
             videoSelectionMenuControllerWhenSwitch.videoSelectionMenuRightComboBoxPromptLabel.setVisible(false);
+
+            if(DBInteraction.isOfflineMode) {
+                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setVisible(true);
+                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setDisable(true);
+                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setOpacity(1);
+                videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
+            }
         }
         MainMenuController.currentStage.setScene(newScene);
     }
