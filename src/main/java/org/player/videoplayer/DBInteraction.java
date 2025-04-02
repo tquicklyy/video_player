@@ -132,7 +132,7 @@ public class DBInteraction {
                 downloadUrl.put(currentSubtopicWithNumber, resultSetForDB.getString("download_url"));
                 imageUrl.put(currentSubtopicWithNumber,resultSetForDB.getString("image_url"));
 
-                File fileToSave = new File(String.format("../Materials/%s/%s/%s/%s.json", subject, topic, numberOfVideo + " " + resultSetForDB.getString("subtopic"), numberOfVideo + " " + resultSetForDB.getString("subtopic")));
+                File fileToSave = new File(String.format("./Materials/%s/%s/%s/%s.json", subject, topic, numberOfVideo + " " + resultSetForDB.getString("subtopic"), numberOfVideo + " " + resultSetForDB.getString("subtopic")));
                 if (!fileToSave.getParentFile().exists()) {
                     if(fileToSave.getParentFile().mkdirs()) {
                         System.out.printf("Успешное создание папки для подтемы %s%n", topic);
@@ -174,7 +174,7 @@ public class DBInteraction {
         URL urlOfVideo;
         File directoryToSave;
         File fileToSave;
-            directoryToSave = new File(String.format("../Materials/%s/%s/%s", subject, topic, subtopic));
+            directoryToSave = new File(String.format("./Materials/%s/%s/%s", subject, topic, subtopic));
             try {
                 urlOfVideo = new URI(downloadUrl.get(subtopic)).toURL();
                 fileToSave = new File(String.format("%s/%s.mp4", directoryToSave, subtopic));
@@ -198,7 +198,7 @@ public class DBInteraction {
         File oldFile;
 
         for(String subtopic: nameOfSubtopics) {
-            directoryToSave = new File(String.format("../Materials/%s/%s/%s", subject, topic, subtopic));
+            directoryToSave = new File(String.format("./Materials/%s/%s/%s", subject, topic, subtopic));
 
             if (Thread.currentThread().isInterrupted()) return; // To avoid downloading the rest
 

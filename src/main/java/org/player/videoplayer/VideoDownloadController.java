@@ -243,7 +243,7 @@ public class VideoDownloadController {
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setDisable(true);
                 videoPlayerControllerWhenSwitch.videoPlayerSceneAnotherVideoButton.setVisible(false);
                 videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
-                File fileWithVideo = new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic));
+                File fileWithVideo = new File(String.format("./Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic));
                 videoPlayerControllerWhenSwitch.urlOfVideo = fileWithVideo.toURI().toString();
                 videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory((fileWithVideo).getParent());
                 videoPlayerControllerWhenSwitch.restartPlayer();

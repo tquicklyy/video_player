@@ -152,16 +152,6 @@ public class VideoPlayerController {
         FXMLLoader fxmlLoader = new FXMLLoader(VideoPlayerApplication.class.getResource(previousScene));
         Scene newScene = new Scene(fxmlLoader.load(), MainMenuController.currentStage.getScene().getWidth(), MainMenuController.currentStage.getScene().getHeight());
         if(previousScene.equals("video-selection-menu-scene.fxml")) {
-            videoPlayerSceneMediaView.setMediaPlayer(null);
-            mediaOfVideo = null;
-            attemptsDownloadVideoIfError = 0;
-            if(mediaPlayerOfVideo != null) {
-                mediaPlayerOfVideo.stop();
-                mediaPlayerOfVideo.dispose();
-                mediaPlayerOfVideo = null;
-            }
-            System.gc();
-
             VideoSelectionMenuController videoSelectionMenuControllerWhenSwitch = fxmlLoader.getController();
             VideoSelectionMenuController.displayVBox(videoSelectionMenuControllerWhenSwitch.videoSelectionMenuFlowPane);
 
@@ -189,6 +179,16 @@ public class VideoPlayerController {
                 videoSelectionMenuControllerWhenSwitch.videoSelectionMenuOfflineModeButton.setText("Автономный режим включён");
             }
         }
+        videoPlayerSceneMediaView.setMediaPlayer(null);
+        mediaOfVideo = null;
+        attemptsDownloadVideoIfError = 0;
+        if(mediaPlayerOfVideo != null) {
+            mediaPlayerOfVideo.stop();
+            mediaPlayerOfVideo.dispose();
+            mediaPlayerOfVideo = null;
+        }
+        System.gc();
+
         MainMenuController.currentStage.setScene(newScene);
     }
 

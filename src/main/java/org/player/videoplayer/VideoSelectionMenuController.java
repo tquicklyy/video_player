@@ -240,7 +240,7 @@ public class VideoSelectionMenuController {
     }
     
     private void leftComboBoxFillInOfflineMode() {
-        File materailsFile = new File("../Materials");
+        File materailsFile = new File("./Materials");
 
         File[] filesInMaterials = materailsFile.listFiles();
         assert filesInMaterials != null;
@@ -272,7 +272,7 @@ public class VideoSelectionMenuController {
         videoSelectionMenuRightComboBox.setDisable(true);
         videoSelectionMenuRightComboBox.setValue(null);
 
-        File materailsThemesFile = new File(String.format("../Materials/%s", videoSelectionMenuLeftComboBox.getValue()));
+        File materailsThemesFile = new File(String.format("./Materials/%s", videoSelectionMenuLeftComboBox.getValue()));
 
         File[] filesInMaterialsTheme = materailsThemesFile.listFiles();
         assert filesInMaterialsTheme != null;
@@ -314,7 +314,7 @@ public class VideoSelectionMenuController {
             alertForSomething.showAndWait();
         });
     }
-    
+
     @FXML
     public void startSynchronize() {
         DBInteraction.isOfflineMode = false;
@@ -587,7 +587,7 @@ public class VideoSelectionMenuController {
         ArrayList<String> listWithSubtopics = new ArrayList<>();
 
         if(DBInteraction.isOfflineMode) {
-            File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
+            File directoryWithSubtopic = new File(String.format("./Materials/%s/%s", subject, topic));
             File[] subtopicFiles = directoryWithSubtopic.listFiles();
             assert subtopicFiles != null;
             if(subtopicFiles.length == 0) {
@@ -659,8 +659,8 @@ public class VideoSelectionMenuController {
             watchLabel.maxWidthProperty().bind(watchLabel.prefWidthProperty());
             watchLabel.setCursor(Cursor.HAND);
 
-            String pathNameOfJSON = String.format("../Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic);
-            String pathNameOfVideoMP4 = String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic);
+            String pathNameOfJSON = String.format("./Materials/%s/%s/%s/%s.json",subject,topic,subtopic,subtopic);
+            String pathNameOfVideoMP4 = String.format("./Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic,subtopic);
 
             watchLabel.setOnMousePressed((MouseEvent _) -> {
                 Scene newScene = null;
@@ -803,7 +803,7 @@ public class VideoSelectionMenuController {
                             videoPlayerControllerWhenSwitch.videoPlayerSceneBackButton.setText("Список видео");
                             videoPlayerControllerWhenSwitch.updateSizes(finalNewScene.getHeight());
                             videoPlayerControllerWhenSwitch.urlOfVideo = new File(pathNameOfVideoMP4).toURI().toString();
-                            videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("../Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic, subtopic)).getParent());
+                            videoPlayerControllerWhenSwitch.doDictionaryOfPathToVideosInCurrentDirectory(new File(String.format("./Materials/%s/%s/%s/%s.mp4", subject, topic, subtopic, subtopic)).getParent());
                             videoPlayerControllerWhenSwitch.restartPlayer();
                             videoPlayerControllerWhenSwitch.addListenerForStageFullScreenProperty();
                             videoPlayerControllerWhenSwitch.isFullScreenListenerAdded = true;
@@ -826,7 +826,7 @@ public class VideoSelectionMenuController {
                     }
                 } catch (Exception e) {
                     String index = "";
-                    for(char symbolInNameOfFile: new File(String.format("../Materials/%s/%s/%s",subject,topic,subtopic)).getName().toCharArray()) {
+                    for(char symbolInNameOfFile: new File(String.format("./Materials/%s/%s/%s",subject,topic,subtopic)).getName().toCharArray()) {
                         if(Character.isDigit(symbolInNameOfFile)) {
                             index += symbolInNameOfFile;
                         } else {
@@ -871,7 +871,7 @@ public class VideoSelectionMenuController {
                 videoSelectionMenuFlowPane.getChildren().add(vBox);
             }
         } else {
-            File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
+            File directoryWithSubtopic = new File(String.format("./Materials/%s/%s", subject, topic));
             File[] subtopicFiles = directoryWithSubtopic.listFiles();
             assert subtopicFiles != null;
             for(File subtopicFile: subtopicFiles) {
@@ -887,20 +887,20 @@ public class VideoSelectionMenuController {
             for (String subtopic : DBInteraction.nameOfSubtopics) {
                 try {
                     imageViewOfVideo = imageViewHashMap.get(subtopic);
-                    imageViewOfVideo.setImage(new Image(new File(String.format("../Materials/%s/%s/%s/%s.png", subject, topic, subtopic, subtopic)).toURI().toString()));
+                    imageViewOfVideo.setImage(new Image(new File(String.format("./Materials/%s/%s/%s/%s.png", subject, topic, subtopic, subtopic)).toURI().toString()));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
             }
         } else {
-            File directoryWithSubtopic = new File(String.format("../Materials/%s/%s", subject, topic));
+            File directoryWithSubtopic = new File(String.format("./Materials/%s/%s", subject, topic));
             File[] subtopicFiles = directoryWithSubtopic.listFiles();
             File imageForSet;
             assert subtopicFiles != null;
             for(File subtopicFile: subtopicFiles) {
                 try {
                     imageViewOfVideo = imageViewHashMap.get(subtopicFile.getName());
-                    imageForSet = new File((String.format("../Materials/%s/%s/%s/%s.png", subject, topic, subtopicFile.getName(), subtopicFile.getName())));
+                    imageForSet = new File((String.format("./Materials/%s/%s/%s/%s.png", subject, topic, subtopicFile.getName(), subtopicFile.getName())));
                     if(imageForSet.exists()) {
                         imageViewOfVideo.setImage(new Image(imageForSet.toURI().toString()));
                     } else {
